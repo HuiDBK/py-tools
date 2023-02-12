@@ -16,7 +16,7 @@ class SingletonMetaCls(type):
 
     def __call__(cls, *args, **kwargs):
         if cls._instance:
-            # 存在实例对象直接返回，避免锁竞争，提高性能
+            # 存在实例对象直接返回，减少锁竞争，提高性能
             return cls._instance
 
         with cls._instance_lock:
