@@ -18,3 +18,8 @@ class MaxRetryException(BusinessException):
 class MaxTimeoutException(BusinessException):
     """最大超时异常"""
     pass
+
+
+class SendMsgException(BusinessException):
+    """发送消息异常"""
+    pass
