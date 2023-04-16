@@ -5,12 +5,14 @@
 # @Date: 2022/11/26 16:08
 
 import time
-from datetime import datetime, timedelta
+from datetime import datetime
+
+from dateutil.relativedelta import relativedelta
 
 from enums.time import TimeFormatEnum
 
 
-class TimeUtils(object):
+class TimeUtil(object):
 
     def __init__(self, datetime_obj: datetime = None, format_str: str = TimeFormatEnum.DateTime.value):
         """
@@ -24,51 +26,45 @@ class TimeUtils(object):
 
     @property
     def yesterday(self) -> datetime:
-        return self._timedelta_calc(days=-1)
+        return self.sub_time(days=1)
 
     @property
     def tomorrow(self) -> datetime:
-        return self._timedelta_calc(days=1)
+        return self.add_time(days=1)
 
     @property
     def week_later(self) -> datetime:
-        return self._timedelta_calc(days=7)
+        return self.add_time(days=7)
 
-    def get_n_days_later(self, days: float) -> datetime:
-        """
-        获取几天前|后的时间
-        Args:
-            days: 天数时间差, 整数几天后, 负数几天前
+    @property
+    def month_later(self) -> datetime:
+        return self.add_time(months=1)
 
-        Returns: datetime
-        """
-        return self._timedelta_calc(days=days)
+    def add_time(self, months=0, days=0, hours=0, minutes=0, seconds=0, **kwargs):
+        return self.datetime_obj + relativedelta(
+            months=months, days=days, hours=hours, minutes=minutes, seconds=seconds, **kwargs
+        )
 
-    def get_n_hours_later(self, hours: float) -> datetime:
-        """
-        获取几小时前|后的时间
-        Args:
-            hours: 小时时间差, 整数几小时后, 负数几小时前
+    def sub_time(self, months=0, days=0, hours=0, minutes=0, seconds=0, **kwargs):
+        return self.datetime_obj - relativedelta(
+            months=months, days=days, hours=hours, minutes=minutes, seconds=seconds, **kwargs
+        )
 
-        Returns: datetime
-        """
-        return self._timedelta_calc(hours=hours)
+    def str_to_datetime(self, date_str: str, format_str: str = None) -> datetime:
+        format_str = format_str or self.format_str
+        return datetime.strptime(date_str, format_str)
 
-    def _timedelta_calc(self, days: float = 0, hours: float = 0, seconds: float = 0) -> datetime:
-        """时间差计算"""
-        return self.datetime_obj + timedelta(days=days, hours=hours, seconds=seconds)
+    def datetime_to_str(self, format_str: str = None) -> str:
+        format_str = format_str or self.format_str
+        return self.datetime_obj.strftime(format_str)
 
-    def str_to_datetime(self, date_str: str) -> datetime:
-        return datetime.strptime(date_str, self.format_str)
+    def timestamp_to_time_str(self, timestamp: float, format_str: str = None) -> str:
+        format_str = format_str or self.format_str
+        return datetime.fromtimestamp(timestamp).strftime(format_str)
 
-    def datetime_to_str(self) -> str:
-        return self.datetime_obj.strftime(self.format_str)
-
-    def timestamp_to_time_str(self, timestamp: float) -> str:
-        return time.strftime(self.format_str, time.localtime(timestamp))
-
-    def time_str_to_timestamp(self, time_str: str) -> int:
-        return int(time.mktime(time.strptime(time_str, self.format_str)))
+    def time_str_to_timestamp(self, time_str: str, format_str: str = None) -> int:
+        format_str = format_str or self.format_str
+        return int(time.mktime(time.strptime(time_str, format_str)))
 
     @staticmethod
     def timestamp_to_datetime(timestamp: float) -> datetime:
@@ -80,15 +76,16 @@ class TimeUtils(object):
 
 
 def main():
-    print(TimeUtils().datetime_to_str())
-    print(TimeUtils(datetime_obj=datetime.now() + timedelta(days=1)).tomorrow)
-    print(TimeUtils().week_later)
-    print(TimeUtils().yesterday)
-    print(TimeUtils().get_n_days_later(10))
+    print(TimeUtil().datetime_to_str())
+    print(TimeUtil(datetime_obj=datetime.now() + relativedelta(days=1)).tomorrow)
+    print(TimeUtil().week_later)
+    print(TimeUtil().yesterday)
+    print(TimeUtil().month_later)
+    print(TimeUtil().add_time(10))
 
-    print(TimeUtils().str_to_datetime("2023-2-05 01:20:30"))
-    print(TimeUtils().datetime_to_str())
-    print(TimeUtils().timestamp_to_time_str(datetime.now().timestamp()))
+    print(TimeUtil().str_to_datetime("2023-2-05 01:20:30"))
+    print(TimeUtil().datetime_to_str())
+    print(TimeUtil().timestamp_to_time_str(datetime.now().timestamp()))
 
 
 if __name__ == '__main__':
