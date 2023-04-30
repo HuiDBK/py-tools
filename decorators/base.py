@@ -3,11 +3,16 @@
 # @Author: Hui
 # @Desc: { 通用装饰器模块 }
 # @Date: 2022/11/26 16:16
+import signal
 import time
 import asyncio
 import threading
 import functools
-from typing import Type
+import traceback
+from concurrent.futures import ThreadPoolExecutor, TimeoutError
+from typing import Type, Callable
+
+from loguru import logger
 
 from exceptions.base import MaxTimeoutException, MaxRetryException
 
@@ -49,74 +54,117 @@ def calc_time(func):
     def wrapper(*args, **kwargs):
         start_ts = time.time()
         ret = func(*args, **kwargs)
-        print(type(ret))
         use_time = time.time() - start_ts
-        print(f"func {func.__name__} use {use_time}s")
+        logger.info(f"func {func.__name__} use {use_time}s")
         return ret
 
     return wrapper
 
 
-def task_retry(
-        max_retry_count: int = 5,
-        time_interval: int = 2,
-        max_timeout: int = None,
+def set_timeout(timeout: int, use_signal=False):
+    """
+    超时处理装饰器
+    Args:
+        timeout: 超时时间，单位秒
+        use_signal: 使用信号量机制只能在 unix内核上使用，默认False
+
+    Raises:
+        TimeoutException
+
+    """
+
+    def _timeout(func: Callable):
+
+        def _handle_timeout(signum, frame):
+            raise MaxTimeoutException(f"Function timed out after {timeout} seconds")
+
+        @functools.wraps(func)
+        def sync_wrapper(*args, **kwargs):
+            # 同步函数处理超时
+            if use_signal:
+                # 使用信号量计算超时
+                signal.signal(signal.SIGALRM, _handle_timeout)
+                signal.alarm(timeout)
+                try:
+                    return func(*args, **kwargs)
+                finally:
+                    signal.alarm(0)
+            else:
+                # 使用线程
+                with ThreadPoolExecutor() as executor:
+                    future = executor.submit(func, *args, **kwargs)
+                    try:
+                        return future.result(timeout)
+                    except TimeoutError:
+                        raise MaxTimeoutException(f"Function timed out after {timeout} seconds")
+
+        @functools.wraps(func)
+        async def async_wrapper(*args, **kwargs):
+            # 异步函数处理超时
+            try:
+                ret = await asyncio.wait_for(func(*args, **kwargs), timeout)
+                return ret
+            except asyncio.TimeoutError:
+                raise MaxTimeoutException(f"Function timed out after {timeout} seconds")
+
+        return async_wrapper if asyncio.iscoroutinefunction(func) else sync_wrapper
+
+    return _timeout
+
+
+def retry(
+        max_count: int = 5,
+        interval: int = 2,
         catch_exc: Type[BaseException] = Exception
 ):
     """
-    任务重试装饰器
+    重试装饰器
     Args:
-        max_retry_count: 最大重试次数 默认 5 次
-        time_interval: 每次重试间隔 默认 2s
-        max_timeout: 最大超时时间，单位s 默认为 None,
+        max_count: 最大重试次数 默认 5 次
+        interval: 每次异常重试间隔 默认 2s
         catch_exc: 指定捕获的异常类用于特定的异常重试 默认捕获 Exception
+
+    Raises:
+        MaxRetryException
     """
 
-    def _task_retry(task_func):
+    def _retry(task_func):
 
         @functools.wraps(task_func)
         def sync_wrapper(*args, **kwargs):
             # 函数循环重试
-            start_time = time.time()
-            for retry_count in range(max_retry_count):
-                print(f"execute count {retry_count + 1}")
-                use_time = time.time() - start_time
-                if max_timeout and use_time > max_timeout:
-                    # 超出最大超时时间
-                    raise MaxTimeoutException(f"execute timeout, use time {use_time}s, max timeout {max_timeout}")
 
+            for retry_count in range(max_count):
+                logger.info(f"{task_func} execute count {retry_count + 1}")
                 try:
-                    task_ret = task_func(*args, **kwargs)
-                    return task_ret
-                except catch_exc as e:
-                    print(f"fail {str(e)}")
-                    time.sleep(time_interval)
-            else:
-                # 超过最大重试次数, 抛异常终止
-                raise MaxRetryException(f"超过最大重试次数失败, max_retry_count {max_retry_count}")
+                    return task_func(*args, **kwargs)
+                except catch_exc:
+                    logger.error(f"fail {traceback.print_exc()}")
+                    if retry_count < max_count - 1:
+                        # 最后一次异常不等待
+                        time.sleep(interval)
+
+            # 超过最大重试次数, 抛异常终止
+            raise MaxRetryException(f"超过最大重试次数失败, max_retry_count {max_count}")
 
         @functools.wraps(task_func)
         async def async_wrapper(*args, **kwargs):
             # 异步循环重试
-            start_time = time.time()
-            for retry_count in range(max_retry_count):
-                print(f"execute count {retry_count + 1}")
-                use_time = time.time() - start_time
-                if max_timeout and use_time > max_timeout:
-                    # 超出最大超时时间
-                    raise MaxTimeoutException(f"execute timeout, use time {use_time}s, max timeout {max_timeout}")
+            for retry_count in range(max_count):
+                logger.info(f"{task_func} execute count {retry_count + 1}")
 
                 try:
                     return await task_func(*args, **kwargs)
                 except catch_exc as e:
-                    print(f"fail {str(e)}")
-                    await asyncio.sleep(time_interval)
-            else:
-                # 超过最大重试次数, 抛异常终止
-                raise MaxRetryException(f"超过最大重试次数失败, max_retry_count {max_retry_count}")
+                    logger.error(f"fail {str(e)}")
+                    if retry_count < max_count - 1:
+                        await asyncio.sleep(interval)
+
+            # 超过最大重试次数, 抛异常终止
+            raise MaxRetryException(f"超过最大重试次数失败, max_retry_count {max_count}")
 
         # 异步函数判断
         wrapper_func = async_wrapper if asyncio.iscoroutinefunction(task_func) else sync_wrapper
         return wrapper_func
 
-    return _task_retry
+    return _retry

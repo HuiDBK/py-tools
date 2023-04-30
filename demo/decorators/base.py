@@ -6,58 +6,93 @@
 import asyncio
 import time
 
-from decorators.base import task_retry
+from loguru import logger
+
+from decorators.base import retry, set_timeout
 from exceptions.base import MaxRetryException, MaxTimeoutException
 
 
-@task_retry(max_retry_count=3, time_interval=1, catch_exc=ZeroDivisionError)
-def user_place_order():
-    # a = 1 / 0
-    a = []
-    b = a[0]
-    print("user place order success")
+@retry()
+def user_place_order_success_demo():
+    """用户下单成功模拟"""
+    logger.debug("user place order success")
     return {"code": 0, "msg": "ok"}
 
 
-@task_retry(max_retry_count=5, time_interval=2, max_timeout=5)
-async def user_place_order_async():
-    """异步函数重试案例"""
+@retry(max_count=3, interval=3)
+def user_place_order_fail_demo():
+    """用户下单失败模拟"""
+    a = 1 / 0  # 使用除零异常模拟业务错误
+    logger.debug("user place order success")
+    return {"code": 0, "msg": "ok"}
+
+
+@set_timeout(2)
+@retry(max_count=3)
+def user_place_order_timeout_demo():
+    """用户下单失败模拟"""
+    time.sleep(5)  # 模拟业务超时
+    logger.debug("user place order success")
+    return {"code": 0, "msg": "ok"}
+
+
+@retry(max_count=2, interval=3)
+async def async_user_place_order_demo():
+    logger.debug("user place order success")
+    return {"code": 0, "msg": "ok"}
+
+
+@retry(max_count=2)
+async def async_user_place_order_fail_demo():
     a = 1 / 0
-    print("user place order success")
+    logger.debug("user place order success")
     return {"code": 0, "msg": "ok"}
 
 
-async def io_test():
-    """模拟io阻塞"""
-    print("io test start")
-    time.sleep(3)
-    print("io test end")
-    return "io test end"
+@set_timeout(2)
+@retry(max_count=3)
+async def async_user_place_order_timeout_demo():
+    await asyncio.sleep(3)
+    logger.debug("user place order success")
+    return {"code": 0, "msg": "ok"}
+
+
+def sync_demo():
+    """同步案例"""
+    user_place_order_success_demo()
+
+    try:
+        user_place_order_fail_demo()
+    except MaxRetryException as e:
+        # 超出最大重新次数异常，业务逻辑处理
+        logger.debug(f"sync 超出最大重新次数 {e}")
+
+    try:
+        user_place_order_timeout_demo()
+    except MaxTimeoutException as e:
+        # 超时异常，业务逻辑处理
+        logger.debug(f"sync 超时异常, {e}")
+
+
+async def async_demo():
+    """异步案例"""
+    await async_user_place_order_demo()
+
+    try:
+        await async_user_place_order_fail_demo()
+    except MaxRetryException as e:
+        logger.debug(f"async 超出最大重新次数 {e}")
+
+    try:
+        await async_user_place_order_timeout_demo()
+    except MaxTimeoutException as e:
+        logger.debug(f"async 超时异常, {e}")
 
 
 async def main():
-    # 同步案例
-    try:
-        ret = user_place_order()
-        print(f"user place order ret {ret}")
-    except MaxRetryException as e:
-        # 超过最大重试次数处理
-        print("MaxRetryException", e)
-    except MaxTimeoutException as e:
-        # 超过最大超时处理
-        print("MaxTimeoutException", e)
+    # sync_demo()
 
-    # 异步案例
-    # ret = await user_place_order_async()
-    # print(f"user place order ret {ret}")
-
-    # 并发异步
-    # order_ret, io_ret = await asyncio.gather(
-    #     user_place_order_async(),
-    #     io_test(),
-    # )
-    # print(f"io ret {io_ret}")
-    # print(f"user place order ret {order_ret}")
+    await async_demo()
 
 
 if __name__ == '__main__':
