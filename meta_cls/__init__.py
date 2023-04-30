@@ -14,12 +14,19 @@ class SingletonMetaCls(type):
         cls._instance = None
         super().__init__(*args, **kwargs)
 
-    def __call__(cls, *args, **kwargs):
+    def _init_instance(cls, *args, **kwargs):
         if cls._instance:
             # 存在实例对象直接返回，减少锁竞争，提高性能
             return cls._instance
 
         with cls._instance_lock:
-            if not cls._instance:
+            if cls._instance is None:
                 cls._instance = super().__call__(*args, **kwargs)
         return cls._instance
+
+    def __call__(cls, *args, reinit=True, **kwargs):
+        instance = cls._init_instance()
+        if reinit:
+            # 重新初始化单例对象属性
+            instance.__init__(*args, **kwargs)
+        return instance
