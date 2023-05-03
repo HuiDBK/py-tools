@@ -14,7 +14,7 @@ from typing import Type, Callable
 
 from loguru import logger
 
-from exceptions.base import MaxTimeoutException, MaxRetryException
+from exceptions import MaxTimeoutException, MaxRetryException
 
 
 def synchronized(func):
