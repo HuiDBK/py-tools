@@ -71,7 +71,7 @@ def cache_json(
     """
     缓存装饰器（仅支持缓存能够json序列化的数据）
     Args:
-        cache_proxy: 缓存代理
+        cache_proxy: 缓存代理对象
         key: 缓存的key
         ttl: 过期时间 默认60s
         cache_meta: 缓存元信息
