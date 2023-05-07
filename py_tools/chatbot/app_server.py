@@ -10,8 +10,8 @@ import requests
 from cacheout import Cache
 from loguru import logger
 
-from enums.feishu import FeishuReceiveType
-from exceptions import SendMsgException
+from py_tools.enums.feishu import FeishuReceiveType
+from py_tools.exceptions import SendMsgException
 
 
 class FeiShuAppServer:

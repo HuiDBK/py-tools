@@ -6,3 +6,4 @@ loguru==0.7.0
 cacheout==0.14.1
 redis==4.5.4
 aioredis==2.0.1
+pytest==7.3.1

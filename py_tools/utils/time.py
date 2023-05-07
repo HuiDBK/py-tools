@@ -10,20 +10,13 @@ from typing import Union
 
 from dateutil.relativedelta import relativedelta
 
-from data_models.time import DateDiff
-from meta_cls import SingletonMetaCls
-from enums import TimeFormatEnum, TimeUnitEnum
+from py_tools.data_models.time import DateDiff
+from py_tools.meta_cls import SingletonMetaCls
+from py_tools.enums import TimeFormatEnum, TimeUnitEnum
 
 
 class TimeUtil(metaclass=SingletonMetaCls):
     """时间工具类"""
-
-    UNITS_IN_SECONDS = {
-        TimeUnitEnum.DAYS: 86400,
-        TimeUnitEnum.HOURS: 3600,
-        TimeUnitEnum.MINUTES: 60,
-        TimeUnitEnum.SECONDS: 1,
-    }
 
     def __init__(self, datetime_obj: datetime = None, format_str: str = TimeFormatEnum.DateTime.value):
         """
@@ -96,24 +89,6 @@ class TimeUtil(metaclass=SingletonMetaCls):
     def timestamp(self) -> float:
         """获取 datetime 对象的时间戳"""
         return self.datetime_obj.timestamp()
-
-    def difference(self, datetime_obj: datetime, unit: Union[TimeUnitEnum, str] = TimeUnitEnum.DAYS) -> int:
-        """
-        计算两个日期之间的差值
-        Args:
-            datetime_obj: 另一个 datetime 对象
-            unit: 时间单位
-        Raises:
-            ValueError: 如果传入unit不在枚举范围内，会抛出ValueError异常
-        Returns:
-            两个日期之间的差值，以指定的单位表示
-        """
-        if isinstance(unit, str):
-            unit = TimeUnitEnum(unit)
-
-        delta = abs(self.datetime_obj - datetime_obj)
-
-        return int(delta.total_seconds() // self.UNITS_IN_SECONDS[unit])
 
     def difference_in_detail(self, datetime_obj: datetime):
         """

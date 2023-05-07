@@ -11,7 +11,7 @@ from urllib.parse import quote_plus
 
 import requests
 
-from exceptions.base import SendMsgException
+from py_tools.exceptions.base import SendMsgException
 
 
 class BaseChatBot(object):

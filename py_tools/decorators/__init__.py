@@ -6,5 +6,7 @@
 from .base import (
     singleton,
     synchronized,
-    calc_time
+    calc_time,
+    retry,
+    set_timeout
 )

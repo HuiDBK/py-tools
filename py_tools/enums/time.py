@@ -3,7 +3,7 @@
 # @Author: Hui
 # @Desc: { 模块描述 }
 # @Date: 2023/02/12 21:38
-from enums.base import BaseEnum
+from py_tools.enums.base import BaseEnum
 
 
 class TimeFormatEnum(BaseEnum):

@@ -3,7 +3,7 @@
 # @Author: Hui
 # @Desc: { 飞书相关枚举 }
 # @Date: 2023/05/03 18:52
-from enums.base import BaseEnum
+from py_tools.enums.base import BaseEnum
 
 
 class FeishuReceiveType(BaseEnum):

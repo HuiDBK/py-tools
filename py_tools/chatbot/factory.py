@@ -5,7 +5,7 @@
 # @Date: 2023/02/19 20:03
 from enum import Enum
 from typing import Dict, Type
-from chatbot import DingTalkChatBot, FeiShuChatBot, WeComChatbot, BaseChatBot
+from py_tools.chatbot import DingTalkChatBot, FeiShuChatBot, WeComChatbot, BaseChatBot
 
 
 class ChatBotType(Enum):

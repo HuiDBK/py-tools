@@ -6,8 +6,8 @@
 import time
 from datetime import datetime
 
-from enums import TimeUnitEnum
-from utils.time import TimeUtil
+from py_tools.enums import TimeUnitEnum
+from py_tools.utils import TimeUtil
 
 
 def time_util_demo():
@@ -43,20 +43,6 @@ def time_util_demo():
 
     print("当前时间的时间戳:", time_util.timestamp)
 
-    # 获取两个日期之间的差值
-    time_util = TimeUtil(datetime_obj=datetime(2023, 4, 24, 10, 30, 0))
-    datetime_obj = datetime(2023, 4, 29, 10, 30, 0)
-
-    delta_days = time_util.difference(datetime_obj, unit="days")
-    delta_hours = time_util.difference(datetime_obj, unit="hours")
-    delta_minutes = time_util.difference(datetime_obj, unit=TimeUnitEnum.MINUTES)
-    delta_seconds = time_util.difference(datetime_obj, unit=TimeUnitEnum.SECONDS)
-
-    print(f"两个日期之间相差的天数: {delta_days}")
-    print(f"两个日期之间相差的小时数: {delta_hours}")
-    print(f"两个日期之间相差的分钟数: {delta_minutes}")
-    print(f"两个日期之间相差的秒数: {delta_seconds}")
-
     date1 = datetime(2023, 4, 24)  # 2023年4月24日，星期一
     date2 = datetime(2023, 5, 1)  # 2023年5月1日，星期一
     time_util = TimeUtil(datetime_obj=date1)
@@ -68,6 +54,7 @@ def time_util_demo():
     weekday_count = time_util.count_weekdays_between(date2, include_end_date=False)
     print(f"从 {date1} 到 {date2} 之间有 {weekday_count} 个工作日。(不包含末尾日期)")
 
+    # 获取两个日期之间的差值
     date_diff = time_util.difference_in_detail(date2)
     print(date_diff)
 

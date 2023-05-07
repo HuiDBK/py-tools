@@ -8,8 +8,8 @@ import time
 
 from loguru import logger
 
-from decorators.base import retry, set_timeout
-from exceptions.base import MaxRetryException, MaxTimeoutException
+from py_tools.decorators import retry, set_timeout
+from py_tools.exceptions import MaxRetryException, MaxTimeoutException
 
 
 @retry()
