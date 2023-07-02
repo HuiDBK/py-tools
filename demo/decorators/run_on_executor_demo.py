@@ -47,12 +47,12 @@ def sync_func():
 
 
 async def main():
-    # ret = await async_func()
-    # logger.debug(ret)
-    #
-    # async_bg_task = await async_func_bg_task()
-    # logger.debug(f"async bg task {async_bg_task}")
-    # logger.debug("async_func_bg_task 等待后台执行中")
+    ret = await async_func()
+    logger.debug(ret)
+
+    async_bg_task = await async_func_bg_task()
+    logger.debug(f"async bg task {async_bg_task}")
+    logger.debug("async_func_bg_task 等待后台执行中")
 
     loop = asyncio.get_event_loop()
     for i in range(3):
