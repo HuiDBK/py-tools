@@ -1,10 +1,29 @@
 # Py-Tools
 
-> Py-Tools 是一个实用的 Python 工具集和可重用组件库，旨在简化常见任务，提高 Python 项目的开发效率。
+> Py-Tools 是一个实用的 Python 工具集和可复用组件库，旨在简化常见任务，提高 Python 项目的开发效率。
 
+## Todo List
 
+### 连接客户端
+- http 同步异步客户端
+- MySQL客户端 - SQLAlchemy-ORM 封装
+- 消息队列客户端，rabbitmq、kafka
+- Minio 客户端
+- websocket 客户端
 
-## 目录结构
+### 工具类
+- 图片操作工具类，例如校验图片分辨率
+- 配置解析工具类
+- 编码工具类，统一 base64、md5等编码入口
+- 认证相关工具类，例如jwt、oauth2等
+- 邮件服务工具类
+- 常用正则工具类
+
+### 装饰器
+
+### 日志
+
+## 工程目录结构
 
 ```
 py-tools/
