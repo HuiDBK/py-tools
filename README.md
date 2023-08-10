@@ -5,7 +5,7 @@
 ## Todo List
 
 ### 连接客户端
-- http 同步异步客户端
+- [x] http 同步异步客户端
 - MySQL客户端 - SQLAlchemy-ORM 封装
 - 消息队列客户端，rabbitmq、kafka
 - Minio 客户端
@@ -90,8 +90,10 @@ py-tools/
 
 2. 在您的项目中引入 Py-Tools:
 
-   将 `py_tools` 文件夹复制到您的项目中，然后在项目中使用 `import` 语句引入所需的模块。
-
+   将 `py_tools` 文件夹复制到您的项目中，然后在项目中使用 `import` 语句引入所需的模块。然后安装项目依赖
+   ```python
+   pip install -r requirements.txt
+   ```
 
 
 后续初步完善后会打包到 pypi 中，通过pip就可以直接下载。

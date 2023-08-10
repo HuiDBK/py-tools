@@ -3,15 +3,12 @@
 # @Author: Hui
 # @Desc: { 模块描述 }
 # @Date: 2023/08/10 09:33
-import asyncio
-
 import httpx
 from datetime import timedelta
 
 import requests
 
 from py_tools.enums import HttpMethod, RespFmt
-from py_tools.logging import logger
 
 
 class AsyncHttpClient:
