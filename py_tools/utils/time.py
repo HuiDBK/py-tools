@@ -6,17 +6,26 @@
 
 import time
 from datetime import datetime
-from typing import Union
+from typing import Type
 
 from dateutil.relativedelta import relativedelta
 
 from py_tools.data_models.time import DateDiff
 from py_tools.meta_cls import SingletonMetaCls
-from py_tools.enums import TimeFormatEnum, TimeUnitEnum
+from py_tools.enums import TimeFormatEnum
 
 
 class TimeUtil(metaclass=SingletonMetaCls):
-    """时间工具类"""
+    """
+    时间工具类
+    """
+
+    @classmethod
+    def instance(cls, reinit=True, *args, **kwargs):
+        instance: Type[cls] = cls._init_instance()
+        if reinit:
+            instance.__init__(*args, **kwargs)
+        return instance
 
     def __init__(self, datetime_obj: datetime = None, format_str: str = TimeFormatEnum.DateTime.value):
         """

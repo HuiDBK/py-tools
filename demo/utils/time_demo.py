@@ -11,7 +11,7 @@ from py_tools.utils import TimeUtil
 
 def time_util_demo():
     # 创建一个TimeUtil实例，默认使用当前时间
-    time_util = TimeUtil()
+    time_util = TimeUtil.instance()
 
     print("昨天的日期:", time_util.yesterday)
 
