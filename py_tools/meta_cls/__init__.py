@@ -24,7 +24,7 @@ class SingletonMetaCls(type):
                 cls._instance = super().__call__(*args, **kwargs)
         return cls._instance
 
-    def __call__(cls, *args, **kwargs,):
+    def __call__(cls, *args, **kwargs):
         instance = cls._init_instance()
         reinit = kwargs.get("reinit", True)
         if reinit:

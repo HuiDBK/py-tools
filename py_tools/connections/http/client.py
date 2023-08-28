@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # @Author: Hui
-# @Desc: { 模块描述 }
+# @Desc: { http客户端 }
 # @Date: 2023/08/10 09:33
 import httpx
 from datetime import timedelta
@@ -53,19 +53,18 @@ class AsyncHttpClient:
         Returns:
             httpx.Response: HTTP响应对象
         """
-        async with self.client as client:
-            timeout = timeout or self.default_timeout
-            headers = self.default_headers or {}
-            self.response = await client.request(
-                method=method.value,
-                url=url,
-                params=params,
-                data=data,
-                headers=headers,
-                timeout=timeout.total_seconds(),
-                **kwargs
-            )
-            return self.response
+        timeout = timeout or self.default_timeout
+        headers = self.default_headers or {}
+        self.response = await self.client.request(
+            method=method.value,
+            url=url,
+            params=params,
+            data=data,
+            headers=headers,
+            timeout=timeout.total_seconds(),
+            **kwargs
+        )
+        return self.response
 
     def _parse_response(self, resp_fmt: RespFmt = None):
         """解析响应
