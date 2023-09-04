@@ -76,9 +76,12 @@ class SQLAlchemyManager(metaclass=SingletonMetaCls):
 
 
 class DBManager(metaclass=SingletonMetaCls):
+    DB_CLIENT: SQLAlchemyManager = None
 
-    def __init__(self, db_client: SQLAlchemyManager):
-        self.db_client = db_client
+    @classmethod
+    def init_db_client(cls, db_client: SQLAlchemyManager):
+        cls.DB_CLIENT = db_client
+        return cls.DB_CLIENT
 
     async def batch_delete_by_ids(
             self,
@@ -99,7 +102,7 @@ class DBManager(metaclass=SingletonMetaCls):
 
         Returns: 删除的记录数
         """
-        async with self.db_client.async_session_maker() as session:
+        async with self.DB_CLIENT.async_session_maker() as session:
             # 构建删除条件
             delete_condition = orm_table.id.in_(pk_ids)
 
@@ -128,7 +131,7 @@ class DBManager(metaclass=SingletonMetaCls):
         Returns:
             成功插入的影响行数
         """
-        async with self.db_client.async_session_maker() as session:
+        async with self.DB_CLIENT.async_session_maker() as session:
             sql = insert(table).values(data_list)
             result = await session.execute(sql)
             await session.commit()
@@ -159,7 +162,7 @@ class DBManager(metaclass=SingletonMetaCls):
 
         # 构建查询基础语句
         base_query = select(cols).where(*conditions).order_by(*orders)
-        async with self.db_client.async_session_maker() as session:
+        async with self.DB_CLIENT.async_session_maker() as session:
             if curr_page is not None and page_size is not None:
                 # 分页查询
                 offset = (curr_page - 1) * page_size
@@ -197,7 +200,7 @@ class DBManager(metaclass=SingletonMetaCls):
             执行sql的结果
         """
         sql = text(sql)
-        async with self.db_client.async_session_maker() as session:
+        async with self.DB_CLIENT.async_session_maker() as session:
             result = await session.execute(sql)
             await session.commit()
             return result

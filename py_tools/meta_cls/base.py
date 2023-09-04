@@ -25,9 +25,9 @@ class SingletonMetaCls(type):
         return cls._instance
 
     def __call__(cls, *args, **kwargs):
-        instance = cls._init_instance()
-        reinit = kwargs.get("reinit", True)
+        instance = cls._init_instance(*args, **kwargs)
+        reinit = kwargs.get("reinit", False)
         if reinit:
-            # 默认都重新初始化单例对象属性
+            # 重新初始化单例对象属性
             instance.__init__(*args, **kwargs)
         return instance
