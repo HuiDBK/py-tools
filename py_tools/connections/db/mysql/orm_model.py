@@ -4,13 +4,13 @@
 # @Desc: { 模块描述 }
 # @Date: 2023/08/17 23:55
 from datetime import datetime
-from sqlalchemy import func, DateTime
+from sqlalchemy import func
 from sqlalchemy.ext.asyncio import AsyncAttrs
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
 class BaseOrmTable(AsyncAttrs, DeclarativeBase):
-    """SQLAIChemy Base ORM Model"""
+    """SQLAlchemy Base ORM Model"""
 
     __abstract__ = True
 

@@ -1,19 +1,21 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # @Author: Hui
-# @Desc: { 模块描述 }
+# @Desc: { 数据库连接客户端模块 }
 # @Date: 2023/08/17 23:57
+import asyncio
 import logging
 from datetime import datetime
 from typing import Type, Any, Union, List
 from loguru import logger
-from sqlalchemy import update, delete, insert
+from sqlalchemy import update, delete, insert, text, select, func
 
-from orm_model import BaseOrmTable
+from py_tools.meta_cls import SingletonMetaCls
+from .orm_model import BaseOrmTable
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncEngine
 
 
-class SQLAIChemyManager:
+class SQLAlchemyManager(metaclass=SingletonMetaCls):
     DB_URL_TEMPLATE = "{protocol}://{user}:{password}@{host}:{port}/{db}"
 
     def __init__(
@@ -26,7 +28,7 @@ class SQLAIChemyManager:
             pool_size: int = 30,
             pool_pre_ping: bool = True,
             pool_recycle: int = 600,
-            log: Union[logging.Logger, logger] = None
+            log: Union[logging.Logger] = None
     ):
         self.host = host
         self.port = port
@@ -72,6 +74,12 @@ class SQLAIChemyManager:
         self.async_session_maker = async_sessionmaker(bind=self.db_engine, expire_on_commit=False)
         return self.db_engine
 
+
+class DBManager(metaclass=SingletonMetaCls):
+
+    def __init__(self, db_client: SQLAlchemyManager):
+        self.db_client = db_client
+
     async def batch_delete_by_ids(
             self,
             orm_table: Type[BaseOrmTable],
@@ -91,7 +99,7 @@ class SQLAIChemyManager:
 
         Returns: 删除的记录数
         """
-        async with self.async_session_maker() as session:
+        async with self.db_client.async_session_maker() as session:
             # 构建删除条件
             delete_condition = orm_table.id.in_(pk_ids)
 
@@ -120,8 +128,76 @@ class SQLAIChemyManager:
         Returns:
             成功插入的影响行数
         """
-        async with self.async_session_maker() as session:
+        async with self.db_client.async_session_maker() as session:
             sql = insert(table).values(data_list)
             result = await session.execute(sql)
             await session.commit()
             return result.rowcount
+
+    async def list_page(
+            self,
+            cols: list,
+            conditions: list = None,
+            orders: list = None,
+            curr_page: int = None,
+            page_size: int = None,
+    ):
+        """
+        单表通用分页查询
+        不指定分页参数查全部
+        Args:
+            cols: 查询的列表字段
+            conditions: 查询的条件列表
+            orders: 排序列表
+            curr_page: 页码
+            page_size: 每页数量
+
+        Returns: total_count, data_list
+        """
+        conditions = conditions or []
+        orders = orders or []
+
+        # 构建查询基础语句
+        base_query = select(cols).where(*conditions).order_by(*orders)
+        async with self.db_client.async_session_maker() as session:
+            if curr_page is not None and page_size is not None:
+                # 分页查询
+                offset = (curr_page - 1) * page_size
+                data_list_query = base_query.limit(page_size).offset(offset)
+                total_count_query = select([func.count()]).select_from(base_query.alias())
+
+                # 执行分页查询和总记录数查询
+                total_count_ret, data_list_ret = await asyncio.gather(
+                    session.execute(total_count_query),
+                    session.execute(data_list_query)
+                )
+                total_count = total_count_ret.scalar()
+                data_list = data_list_ret.all()
+
+            else:
+                # 执行普通查询
+                data_list_ret = await session.execute(base_query)
+                data_list = data_list_ret.all()
+                total_count = len(data_list)
+
+            await session.commit()
+
+        # 转成字典列表
+        data_list = list(map(dict, data_list))
+
+        return total_count, data_list
+
+    async def run_sql(self, sql: str):
+        """
+        执行并提交单条sql
+        Args:
+            sql: sql语句
+
+        Returns:
+            执行sql的结果
+        """
+        sql = text(sql)
+        async with self.db_client.async_session_maker() as session:
+            result = await session.execute(sql)
+            await session.commit()
+            return result
