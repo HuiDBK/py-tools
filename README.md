@@ -1,6 +1,71 @@
 # Py-Tools
 
 > Py-Tools 是一个实用的 Python 工具集和可复用组件库，旨在简化常见任务，提高 Python 项目的开发效率。
+> 
+> 设计细节请移步到掘金查看：https://juejin.cn/column/7131286129713610766
+
+## 安装
+python version >= 3.7
+
+### 全部安装
+```python
+pip install hui_tools[all]
+```
+
+### 可选安装
+```python
+pip install hui_tools[db-orm, db-redis, excel-tools]
+```
+
+可选参数参考：
+```python
+extras_require = {
+   "db-orm": ["sqlalchemy[asyncio]==2.0.20", "aiomysql==0.2.0"], # 数据库orm
+   "db-redis": ["redis==4.5.4", "aioredis==2.0.1"], # redis
+   "chatbot": ["requests==2.31.0", "cacheout==0.14.1"], # 飞书、钉钉、企业微信机器人通知
+   "http-client": ["httpx==0.24.1", "requests==2.31.0"], # http 同步、异步客户端
+   "time-tools": ["python-dateutil==2.8.2"], # 时间工具类
+   "excel-tools": ["pandas==1.3.5", "openpyxl==3.0.10"], # excel工具类
+}
+```
+
+### 简单使用
+
+http 客户端举例
+```python
+import asyncio
+
+from py_tools.enums import RespFmt
+from py_tools.logging import logger
+from py_tools.connections.http import HttpClient, AsyncHttpClient
+
+
+async def async_http_client_demo():
+    logger.debug("async_http_client_demo")
+    url = "https://github.com/HuiDBK"
+
+    # 调用
+    data = await AsyncHttpClient().get(url, resp_fmt=RespFmt.TEXT)
+    logger.debug(data)
+
+
+def sync_http_client_demo():
+    logger.debug("sync_http_client_demo")
+    url = "https://github.com/HuiDBK"
+    text_content = HttpClient().get(url).text
+    logger.debug(text_content)
+
+
+async def main():
+    await async_http_client_demo()
+
+    sync_http_client_demo()
+
+
+if __name__ == '__main__':
+    asyncio.run(main())
+
+```
 
 ## Todo List
 
@@ -72,7 +137,7 @@ py-tools/
 
 在 `demo` 目录下，您可以找到一些使用 Py-Tools 的示例代码，这些代码展示了如何使用这些工具集实现实际项目中的任务。
 
-
+demo：https://github.com/HuiDBK/py-tools/tree/master/demo
 
 ### 测试
 
