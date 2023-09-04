@@ -8,11 +8,11 @@ import asyncio
 from py_tools.connections.db.mysql import SQLAlchemyManager, DBManager
 
 db_client = SQLAlchemyManager(
-    host="43.138.173.93",
+    host="127.0.0.1",
     port=3306,
     user="root",
-    password="123456",
-    db_name="house_rental",
+    password="tf123456",
+    db_name="task_flow",
 )
 
 
