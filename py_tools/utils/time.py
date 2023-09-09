@@ -22,9 +22,7 @@ class TimeUtil(metaclass=SingletonMetaCls):
 
     @classmethod
     def instance(cls, reinit=True, *args, **kwargs):
-        instance: Type[cls] = cls._init_instance()
-        if reinit:
-            instance.__init__(*args, **kwargs)
+        instance = cls(*args, reinit=reinit, **kwargs)
         return instance
 
     def __init__(self, datetime_obj: datetime = None, format_str: str = TimeFormatEnum.DateTime.value):

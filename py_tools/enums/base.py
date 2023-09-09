@@ -16,7 +16,12 @@ class BaseEnum(Enum):
             value: 枚举成员的值
             desc: 枚举成员的描述信息，默认None
         """
-        obj = object.__new__(cls)
+        if issubclass(cls, int):
+            obj = int.__new__(cls, value)
+        elif issubclass(cls, str):
+            obj = str.__new__(cls, value)
+        else:
+            obj = object.__new__(cls)
         obj._value_ = value
         obj.desc = desc
         return obj
@@ -54,7 +59,9 @@ class BaseEnum(Enum):
 
 class StrEnum(str, BaseEnum):
     """字符串枚举"""
+    pass
 
 
 class IntEnum(int, BaseEnum):
     """整型枚举"""
+    pass

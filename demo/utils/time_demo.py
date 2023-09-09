@@ -6,6 +6,7 @@
 import time
 from datetime import datetime
 
+from py_tools.enums import TimeFormatEnum
 from py_tools.utils import TimeUtil
 
 
@@ -56,6 +57,13 @@ def time_util_demo():
     # 获取两个日期之间的差值
     date_diff = time_util.difference_in_detail(date2)
     print(date_diff)
+
+    datetime_ret = time_util.datetime_to_str(format_str=TimeFormatEnum.DateTime_CN)
+    date_only_ret = time_util.datetime_to_str(format_str=TimeFormatEnum.DateOnly_CN)
+    time_only_ret = time_util.datetime_to_str(format_str=TimeFormatEnum.TimeOnly_CN)
+    print(datetime_ret)
+    print(date_only_ret)
+    print(time_only_ret)
 
 
 def main():

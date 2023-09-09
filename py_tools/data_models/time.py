@@ -3,11 +3,10 @@
 # @Author: Hui
 # @Desc: { 时间数据模型 }
 # @Date: 2023/04/30 23:35
-from dataclasses import dataclass
+from pydantic import BaseModel
 
 
-@dataclass
-class DateDiff:
+class DateDiff(BaseModel):
     years: int
     months: int
     days: int

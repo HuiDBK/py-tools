@@ -7,19 +7,18 @@ import asyncio
 import functools
 import hashlib
 import json
-from dataclasses import dataclass
+from pydantic import BaseModel, Field
 from typing import Type
 from py_tools import constants
 
 
-@dataclass
-class CacheMeta:
+class CacheMeta(BaseModel):
     """缓存元信息"""
 
-    key: str  # 缓存的key
-    ttl: int  # 缓存有效期
-    type: str = None  # 缓存的类型（Redis）
-    data_type: str = None  # 缓存的数据类型（str、list、hash、set）
+    key: str = Field(description="缓存的key")
+    ttl: int = Field(description="缓存有效期")
+    cache_type: str = Field(description="缓存的类型（Redis、Memcached等）")
+    data_type: str = Field(description="缓存的数据类型（str、list、hash、set）")
 
 
 class BaseCacheProxy(object):
