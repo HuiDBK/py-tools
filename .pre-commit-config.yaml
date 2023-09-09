@@ -1,28 +1,28 @@
 repos:
   - repo: https://github.com/psf/black # 第一次会下载，后面会reuse
-    rev: 22.3.0 # 当前最新版本
+    rev: 23.7.0 # 当前最新版本
     hooks:
       - id: black
-        args: ["-l 127"] # 默认最大长度是88
-        language_version: python3.9 # 建议明确版本，不然会使用默认版本3.7(https://pre-commit.com/#top_level-default_language_version)
+        args: [ '-l 127' ] # 默认最大长度是88
+        language_version: python3.10 # 建议明确版本，不然会使用默认版本3.7(https://pre-commit.com/#top_level-default_language_version)
 
   - repo: https://github.com/pycqa/flake8 # 同上
-    rev: 4.0.1 # 同上
+    rev: 6.1.0  # 同上
     hooks:
       - id: flake8
         args: [
-            "--show-source",
-            "--count",
-            "--statistics",
-            "--max-line-length=127",
-            "--max-complexity=10",
-            "--extend-ignore=E203,E402,F403,C901",
-            "--per-file-ignores=__init__.py:F401",
-          ] # 默认最大长度79，复杂度和可选忽略错误可以看情况更新，其默认值可通过flake8 -h查看
+          '--show-source',
+          '--count',
+          '--statistics',
+          '--max-line-length=127',
+          '--max-complexity=10',
+          '--extend-ignore=E203,E402,F401',
+        ] # 默认最大长度79，复杂度和可选忽略错误可以看情况更新，其默认值可通过flake8 -h查看
         exclude: ^venv/ # (^foo/|^bar/)
 
   - repo: https://github.com/pycqa/isort # 同上
-    rev: 5.11.5 # 同上
+    rev: 5.12.0 # 同上
     hooks:
       - id: isort
-        args: ["--profile", "black",  --line-length=127] # 默认最大长度是79
+        name: isort (python)
+        args: [ '-l 127', '--profile black' ] # 默认最大长度是79

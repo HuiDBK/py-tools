@@ -5,7 +5,16 @@
 > 设计细节请移步到掘金查看：https://juejin.cn/column/7131286129713610766
 
 ## 安装
-python version >= 3.7
+- 环境要求：python version >= 3.7
+- 历史版本记录：https://pypi.org/project/hui-tools/#history
+
+
+### 默认安装
+```python
+pip install hui_tools
+```
+默认安装只会安装loguru的日志库和pydantic，使用的功能较少
+
 
 ### 全部安装
 ```python
@@ -30,6 +39,8 @@ extras_require = {
 ```
 
 ### 简单使用
+> 所有功能都是从 py_tools 包中导入使用
+> 详细使用请查看项目的DEMO： https://github.com/HuiDBK/py-tools/tree/master/demo
 
 http 客户端举例
 ```python
@@ -70,11 +81,11 @@ if __name__ == '__main__':
 ## Todo List
 
 ### 连接客户端
-- [x] http 同步异步客户端
-- MySQL客户端 - SQLAlchemy-ORM 封装
-- 消息队列客户端，rabbitmq、kafka
-- Minio 客户端
-- websocket 客户端
+1. [x] http 同步异步客户端
+2. [x] MySQL客户端 - SQLAlchemy-ORM 封装 
+3. Minio 客户端 
+4. 消息队列客户端，rabbitmq、kafka 
+5. websocket 客户端
 
 ### 工具类
 - 图片操作工具类，例如校验图片分辨率
@@ -85,6 +96,10 @@ if __name__ == '__main__':
 - 常用正则工具类
 
 ### 装饰器
+
+### 枚举
+
+### 异常
 
 ### 日志
 
@@ -145,26 +160,30 @@ demo：https://github.com/HuiDBK/py-tools/tree/master/demo
 
 
 
-## 如何使用
+## 一起贡献
+> 欢迎您对本项目进行贡献。请在提交 Pull Request 之前阅读项目的贡献指南，并确保您的代码符合项目的代码风格。
 
 1. 克隆本项目到本地：
+```bash
+git clone https://github.com/HuiDBK/py-tools.git
+```
 
-   ```bash
-   git clone https://github.com/HuiDBK/py-tools.git
-   ```
+2. 安装依赖:
+```python
+pip install -r requirements.txt
+```
 
-2. 在您的项目中引入 Py-Tools:
+3. 配置python代码风格检查到 git hook 中
 
-   将 `py_tools` 文件夹复制到您的项目中，然后在项目中使用 `import` 语句引入所需的模块。然后安装项目依赖
-   ```python
-   pip install -r requirements.txt
-   ```
+安装 pre-commit
+```python
+pip install pre-commit
+```
 
+再项目目录下执行
+```python
+pre-commit install
+```
+安装成功后 git commit 后会提前进行代码检查
 
-后续初步完善后会打包到 pypi 中，通过pip就可以直接下载。
-
-
-
-## 贡献
-
-欢迎您对本项目进行贡献。请在提交 Pull Request 之前阅读项目的贡献指南，并确保您的代码符合项目的代码风格。
+4. 提PR
