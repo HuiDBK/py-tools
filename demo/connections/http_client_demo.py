@@ -22,12 +22,15 @@ async def async_http_client_demo():
 def sync_http_client_demo():
     logger.debug("sync_http_client_demo")
     url = "http://www.baidu.com"
-    text_content = HttpClient().get(url).text
-    logger.debug(text_content)
+    http_client = HttpClient()
+    for i in range(2):
+        text_content = http_client.get(url).text
+        logger.debug(text_content)
 
 
 async def main():
-    await async_http_client_demo()
+    await asyncio.gather(*[async_http_client_demo(), async_http_client_demo()])
+    # await async_http_client_demo()
 
     sync_http_client_demo()
 
