@@ -29,6 +29,7 @@ class AsyncHttpClient:
         self.default_timeout = timeout
         self.default_headers = headers or {}
         self.default_resp_fmt = resp_fmt
+        self.client = httpx.AsyncClient()
         self.response: httpx.Response = None
 
     async def _request(
@@ -54,16 +55,15 @@ class AsyncHttpClient:
         """
         timeout = timeout or self.default_timeout
         headers = self.default_headers or {}
-        async with httpx.AsyncClient() as client:
-            self.response = await client.request(
-                method=method.value,
-                url=url,
-                params=params,
-                data=data,
-                headers=headers,
-                timeout=timeout.total_seconds(),
-                **kwargs
-            )
+        self.response = await self.client.request(
+            method=method.value,
+            url=url,
+            params=params,
+            data=data,
+            headers=headers,
+            timeout=timeout.total_seconds(),
+            **kwargs
+        )
         return self.response
 
     def _parse_response(self, resp_fmt: RespFmt = None):
@@ -200,19 +200,18 @@ class HttpClient:
         Returns:
             httpx.Response: HTTP响应对象
         """
-        with self.client as client:
-            timeout = timeout or self.default_timeout
-            headers = self.default_headers or {}
-            self.response = client.request(
-                method=method.value,
-                url=url,
-                params=params,
-                data=data,
-                headers=headers,
-                timeout=timeout.total_seconds(),
-                **kwargs
-            )
-            return self.response
+        timeout = timeout or self.default_timeout
+        headers = self.default_headers or {}
+        self.response = self.client.request(
+            method=method.value,
+            url=url,
+            params=params,
+            data=data,
+            headers=headers,
+            timeout=timeout.total_seconds(),
+            **kwargs
+        )
+        return self.response
 
     @property
     def json(self):

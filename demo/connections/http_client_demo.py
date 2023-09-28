@@ -30,7 +30,7 @@ def sync_http_client_demo():
 
 async def main():
     await asyncio.gather(*[async_http_client_demo(), async_http_client_demo()])
-    # await async_http_client_demo()
+    await async_http_client_demo()
 
     sync_http_client_demo()
 
