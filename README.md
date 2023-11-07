@@ -11,19 +11,19 @@
 
 ### 默认安装
 ```python
-pip install hui_tools
+pip install hui-tools
 ```
 默认安装只会安装loguru的日志库和pydantic，使用的功能较少
 
 
 ### 全部安装
 ```python
-pip install hui_tools[all]
+pip install hui-tools[all]
 ```
 
 ### 可选安装
 ```python
-pip install hui_tools[db-orm, db-redis, excel-tools]
+pip install hui-tools[db-orm, db-redis, excel-tools]
 ```
 
 可选参数参考：

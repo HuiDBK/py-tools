@@ -137,6 +137,42 @@ class DBManager(metaclass=SingletonMetaCls):
             await session.commit()
             return result.rowcount
 
+    async def query(
+            self,
+            cols: list,
+            conditions: list = None,
+            orders: list = None,
+            limit: int = None,
+            offset: int = None,
+    ):
+        """
+        单表通用分页查询
+        不指定分页参数查全部
+        Args:
+            cols: 查询的列表字段
+            conditions: 查询的条件列表
+            orders: 排序列表
+            limit: 查询的条数
+            offset: 查询的偏移量
+
+        Returns: total_count, data_list
+        """
+        conditions = conditions or []
+        orders = orders or []
+
+        # 构建查询基础语句
+        base_query = select(cols).where(*conditions).order_by(*orders)
+        if limit is not None and offset is not None:
+            base_query = base_query.limit(limit).offset(offset)
+
+        async with self.DB_CLIENT.async_session_maker() as session:
+            # 执行查询
+            cur_result = await session.execute(base_query)
+            query_ret = cur_result.mappings().fetchall()
+            await session.commit()
+
+            return list(map(dict, query_ret))
+
     async def list_page(
             self,
             cols: list,
