@@ -5,6 +5,7 @@
 # @Date: 2023/9/04 19:59
 import operator
 from functools import reduce
+
 from setuptools import find_packages, setup
 
 
@@ -24,10 +25,7 @@ class PKGManager:
     @classmethod
     def get_install_requires(cls):
         """获取必须安装依赖"""
-        requires = [
-            "loguru==0.7.0",
-            "pydantic==2.1.1"
-        ]
+        requires = ["loguru>=0.7.0,<0.8", "pydantic>=2.1.1,<3"]
         return requires
 
     @classmethod
@@ -37,21 +35,18 @@ class PKGManager:
         """
         extras_require = {
             "db-orm": ["sqlalchemy[asyncio]==2.0.20", "aiomysql==0.2.0"],
-            "db-redis": ["redis==4.5.4", "aioredis==2.0.1"],
+            "db-redis": ["redis>=4.5.4"],
             "chatbot": ["requests==2.31.0", "cacheout==0.14.1"],
             "http-client": ["httpx==0.24.1", "requests==2.31.0"],
             "time-tools": ["python-dateutil==2.8.2"],
             "excel-tools": ["pandas==1.3.5", "openpyxl==3.0.10"],
         }
 
-        extras_require["all"] = list(
-            set(reduce(operator.add, [cls.get_install_requires(), *extras_require.values()]))
-        )
+        extras_require["all"] = list(set(reduce(operator.add, [cls.get_install_requires(), *extras_require.values()])))
         return extras_require
 
 
 def main():
-
     setup(
         name=PKGManager.name,
         author=PKGManager.author,
@@ -69,11 +64,11 @@ def main():
             "Operating System :: OS Independent",
         ],
         extras_require=PKGManager.get_extras_require(),
-        python_requires=">=3.7"
+        python_requires=">=3.7",
     )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # python3 setup.py sdist bdist_wheel
     # twine upload --repository testpypi dist/*
     # twine upload dist/*
