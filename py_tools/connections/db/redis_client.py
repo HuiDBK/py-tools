@@ -4,8 +4,9 @@
 # @Desc: { redis连接处理模块 }
 # @Date: 2023/05/03 21:13
 from typing import Optional, Union
-import aioredis
+
 from redis import Redis
+from redis import asyncio as aioredis
 
 
 class RedisManager:
@@ -15,13 +16,13 @@ class RedisManager:
 
     @classmethod
     def init_redis_client(
-            cls,
-            async_client: bool = False,
-            host: str = 'localhost',
-            port: int = 6379,
-            db: int = 0,
-            max_connections: Optional[int] = None,
-            **kwargs
+        cls,
+        async_client: bool = False,
+        host: str = "localhost",
+        port: int = 6379,
+        db: int = 0,
+        max_connections: Optional[int] = None,
+        **kwargs
     ):
         """
         初始化 Redis 客户端。

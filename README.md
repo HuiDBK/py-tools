@@ -30,7 +30,7 @@ pip install hui_tools[db-orm, db-redis, excel-tools]
 ```python
 extras_require = {
    "db-orm": ["sqlalchemy[asyncio]==2.0.20", "aiomysql==0.2.0"], # 数据库orm
-   "db-redis": ["redis==4.5.4", "aioredis==2.0.1"], # redis
+   "db-redis": ["redis>=4.5.4"], # redis
    "chatbot": ["requests==2.31.0", "cacheout==0.14.1"], # 飞书、钉钉、企业微信机器人通知
    "http-client": ["httpx==0.24.1", "requests==2.31.0"], # http 同步、异步客户端
    "time-tools": ["python-dateutil==2.8.2"], # 时间工具类
