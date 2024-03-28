@@ -8,15 +8,16 @@ import functools
 import logging
 from contextlib import asynccontextmanager
 from datetime import datetime
-from typing import Type, Any, Union, List, TypeVar
+from typing import Any, List, Type, TypeVar, Union
+
 from loguru import logger
-from sqlalchemy import update, delete, insert, text, select, func, column, Result
+from sqlalchemy import Result, column, delete, func, insert, select, text, update
+from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker, create_async_engine
 
 from py_tools.connections.db.mysql import BaseOrmTable
 from py_tools.meta_cls import SingletonMetaCls
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncEngine, AsyncSession
 
-T_BaseOrmTable = TypeVar('T_BaseOrmTable', bound=BaseOrmTable)
+T_BaseOrmTable = TypeVar("T_BaseOrmTable", bound=BaseOrmTable)
 T_Hints = TypeVar("T_Hints")  # 用于修复被装饰的函数参数提示，让IDE有类型提示
 
 
@@ -49,16 +50,16 @@ class SQLAlchemyManager(metaclass=SingletonMetaCls):
     DB_URL_TEMPLATE = "{protocol}://{user}:{password}@{host}:{port}/{db}"
 
     def __init__(
-            self,
-            host: str = "localhost",
-            port: int = 3306,
-            user: str = "",
-            password: str = "",
-            db_name: str = "",
-            pool_size: int = 30,
-            pool_pre_ping: bool = True,
-            pool_recycle: int = 600,
-            log: Union[logging.Logger] = None
+        self,
+        host: str = "localhost",
+        port: int = 3306,
+        user: str = "",
+        password: str = "",
+        db_name: str = "",
+        pool_size: int = 30,
+        pool_pre_ping: bool = True,
+        pool_recycle: int = 600,
+        log: Union[logging.Logger] = None,
     ):
         self.host = host
         self.port = port
@@ -75,12 +76,7 @@ class SQLAlchemyManager(metaclass=SingletonMetaCls):
 
     def get_db_url(self, protocol: str = "mysql+aiomysql"):
         db_url = self.DB_URL_TEMPLATE.format(
-            protocol=protocol,
-            user=self.user,
-            password=self.password,
-            host=self.host,
-            port=self.port,
-            db=self.db_name
+            protocol=protocol, user=self.user, password=self.password, host=self.host, port=self.port, db=self.db_name
         )
         return db_url
 
@@ -96,10 +92,7 @@ class SQLAlchemyManager(metaclass=SingletonMetaCls):
         db_url = self.get_db_url(protocol=protocol)
         self.log.info(f"init_mysql_engine => {db_url}")
         self.db_engine = create_async_engine(
-            url=db_url,
-            pool_size=self.pool_size,
-            pool_pre_ping=self.pool_pre_ping,
-            pool_recycle=self.pool_recycle
+            url=db_url, pool_size=self.pool_size, pool_pre_ping=self.pool_pre_ping, pool_recycle=self.pool_recycle
         )
         self.async_session_maker = async_sessionmaker(bind=self.db_engine, expire_on_commit=False)
         return self.db_engine
@@ -123,13 +116,13 @@ class DBManager(metaclass=SingletonMetaCls):
 
     @with_session
     async def bulk_delete_by_ids(
-            self,
-            pk_ids: list,
-            orm_table: Type[BaseOrmTable] = None,
-            logic_del: bool = False,
-            logic_field: str = "deleted_at",
-            logic_del_set_value: Any = None,
-            session: AsyncSession = None
+        self,
+        pk_ids: list,
+        orm_table: Type[BaseOrmTable] = None,
+        logic_del: bool = False,
+        logic_field: str = "deleted_at",
+        logic_del_set_value: Any = None,
+        session: AsyncSession = None,
     ):
         """
         根据主键id批量删除
@@ -151,18 +144,18 @@ class DBManager(metaclass=SingletonMetaCls):
             logic_del=logic_del,
             logic_field=logic_field,
             logic_del_set_value=logic_del_set_value,
-            session=session
+            session=session,
         )
 
     @with_session
     async def delete_by_id(
-            self,
-            pk_id: int,
-            orm_table: Type[BaseOrmTable] = None,
-            logic_del: bool = False,
-            logic_field: str = "deleted_at",
-            logic_del_set_value: Any = None,
-            session: AsyncSession = None
+        self,
+        pk_id: int,
+        orm_table: Type[BaseOrmTable] = None,
+        logic_del: bool = False,
+        logic_field: str = "deleted_at",
+        logic_del_set_value: Any = None,
+        session: AsyncSession = None,
     ):
         """
         根据主键id删除
@@ -184,18 +177,18 @@ class DBManager(metaclass=SingletonMetaCls):
             logic_del=logic_del,
             logic_field=logic_field,
             logic_del_set_value=logic_del_set_value,
-            session=session
+            session=session,
         )
 
     @with_session
     async def delete(
-            self,
-            conds: list = None,
-            orm_table: Type[BaseOrmTable] = None,
-            logic_del: bool = False,
-            logic_field: str = "deleted_at",
-            logic_del_set_value: Any = None,
-            session: AsyncSession = None,
+        self,
+        conds: list = None,
+        orm_table: Type[BaseOrmTable] = None,
+        logic_del: bool = False,
+        logic_field: str = "deleted_at",
+        logic_del_set_value: Any = None,
+        session: AsyncSession = None,
     ):
         """
         通用删除
@@ -227,10 +220,10 @@ class DBManager(metaclass=SingletonMetaCls):
 
     @with_session
     async def bulk_insert(
-            self,
-            add_rows: List[dict],
-            orm_table: Type[BaseOrmTable] = None,
-            session: AsyncSession = None,
+        self,
+        add_rows: List[dict],
+        orm_table: Type[BaseOrmTable] = None,
+        session: AsyncSession = None,
     ) -> Union[int, Any]:
         """
         批量插入
@@ -277,10 +270,10 @@ class DBManager(metaclass=SingletonMetaCls):
 
     @with_session
     async def query_by_id(
-            self,
-            pk_id: int,
-            orm_table: Type[BaseOrmTable] = None,
-            session: AsyncSession = None,
+        self,
+        pk_id: int,
+        orm_table: Type[BaseOrmTable] = None,
+        session: AsyncSession = None,
     ) -> Union[T_BaseOrmTable, None]:
         """
         根据主键id查询
@@ -298,14 +291,14 @@ class DBManager(metaclass=SingletonMetaCls):
 
     @with_session
     async def _query(
-            self,
-            cols: list = None,
-            orm_table: BaseOrmTable = None,
-            conds: list = None,
-            orders: list = None,
-            limit: int = None,
-            offset: int = 0,
-            session: AsyncSession = None,
+        self,
+        cols: list = None,
+        orm_table: BaseOrmTable = None,
+        conds: list = None,
+        orders: list = None,
+        limit: int = None,
+        offset: int = 0,
+        session: AsyncSession = None,
     ) -> Result[Any]:
         """
         通用查询
@@ -345,13 +338,13 @@ class DBManager(metaclass=SingletonMetaCls):
 
     @with_session
     async def query_one(
-            self,
-            cols: list = None,
-            orm_table: Type[BaseOrmTable] = None,
-            conds: list = None,
-            orders: list = None,
-            flat: bool = False,
-            session: AsyncSession = None,
+        self,
+        cols: list = None,
+        orm_table: Type[BaseOrmTable] = None,
+        conds: list = None,
+        orders: list = None,
+        flat: bool = False,
+        session: AsyncSession = None,
     ) -> Union[dict, T_BaseOrmTable, Any]:
         """
         查询单行
@@ -404,15 +397,15 @@ class DBManager(metaclass=SingletonMetaCls):
 
     @with_session
     async def query_all(
-            self,
-            cols: list = None,
-            orm_table: BaseOrmTable = None,
-            conds: list = None,
-            orders: list = None,
-            flat: bool = False,
-            limit: int = None,
-            offset: int = None,
-            session: AsyncSession = None,
+        self,
+        cols: list = None,
+        orm_table: BaseOrmTable = None,
+        conds: list = None,
+        orders: list = None,
+        flat: bool = False,
+        limit: int = None,
+        offset: int = None,
+        session: AsyncSession = None,
     ) -> Union[List[dict], List[T_BaseOrmTable], Any]:
         """
         查询多行
@@ -443,16 +436,15 @@ class DBManager(metaclass=SingletonMetaCls):
             # [User(id=1, username="hui", age=18), User(id=2, username="dbk", age=18)
             return cursor_result.scalars().all()
 
-    @with_session
     async def list_page(
-            self,
-            cols: list = None,
-            orm_table: BaseOrmTable = None,
-            conds: list = None,
-            orders: list = None,
-            curr_page: int = 1,
-            page_size: int = 20,
-            session: AsyncSession = None,
+        self,
+        cols: list = None,
+        orm_table: BaseOrmTable = None,
+        conds: list = None,
+        orders: list = None,
+        curr_page: int = 1,
+        page_size: int = 20,
+        session: AsyncSession = None,
     ):
         """
         单表通用分页查询
@@ -474,9 +466,7 @@ class DBManager(metaclass=SingletonMetaCls):
         limit = page_size
         offset = (curr_page - 1) * page_size
         total_count, data_list = await asyncio.gather(
-            self.query_one(
-                cols=[func.count()], orm_table=orm_table, conds=conds, orders=orders, flat=True, session=session
-            ),
+            self.query_one(cols=[func.count()], orm_table=orm_table, conds=conds, orders=orders, flat=True, session=session),
             self.query_all(
                 cols=cols, orm_table=orm_table, conds=conds, orders=orders, limit=limit, offset=offset, session=session
             ),
@@ -486,11 +476,11 @@ class DBManager(metaclass=SingletonMetaCls):
 
     @with_session
     async def update(
-            self,
-            values: dict,
-            orm_table: Type[BaseOrmTable] = None,
-            conds: list = None,
-            session: AsyncSession = None,
+        self,
+        values: dict,
+        orm_table: Type[BaseOrmTable] = None,
+        conds: list = None,
+        session: AsyncSession = None,
     ):
         """
         更新数据
@@ -514,11 +504,7 @@ class DBManager(metaclass=SingletonMetaCls):
 
     @with_session
     async def run_sql(
-            self,
-            sql: str,
-            params: dict = None,
-            query_one: bool = False,
-            session: AsyncSession = None
+        self, sql: str, params: dict = None, query_one: bool = False, session: AsyncSession = None
     ) -> Union[dict, List[dict]]:
         """
         执行并提交单条sql

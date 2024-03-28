@@ -198,7 +198,6 @@ class DBManager(metaclass=SingletonMetaCls):
             # eg: select id, username, age from user where id=1 => UserTable(id=1, username="hui", age=18)
             return cursor_result.scalar_one()
         
-    @with_session
     async def list_page(
             self,
             cols: list = None,
