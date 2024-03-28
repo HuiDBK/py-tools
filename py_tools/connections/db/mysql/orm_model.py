@@ -16,12 +16,6 @@ class BaseOrmTable(AsyncAttrs, DeclarativeBase):
 
     id: Mapped[int] = mapped_column(primary_key=True, comment="主键ID")
 
-    created_at: Mapped[datetime] = mapped_column(default=func.now, comment="创建时间")
-
-    updated_at: Mapped[datetime] = mapped_column(default=func.now, onupdate=func.now, comment="更新时间")
-
-    deleted_at: Mapped[datetime] = mapped_column(nullable=True, comment="删除时间")
-
     def to_dict(self, alias_dict: dict = None, exclude_none=True) -> dict:
         """
         数据库模型转成字典
@@ -31,6 +25,7 @@ class BaseOrmTable(AsyncAttrs, DeclarativeBase):
             exclude_none: 默认排查None值
         Returns: dict
         """
+        alias_dict = alias_dict or {}
         if exclude_none:
             return {
                 alias_dict.get(c.name, c.name): getattr(self, c.name)
@@ -41,3 +36,18 @@ class BaseOrmTable(AsyncAttrs, DeclarativeBase):
                 alias_dict.get(c.name, c.name): getattr(self, c.name, None)
                 for c in self.__table__.columns
             }
+
+
+class TimestampColumns(AsyncAttrs, DeclarativeBase):
+    """时间戳相关列"""
+    __abstract__ = True
+
+    created_at: Mapped[datetime] = mapped_column(default=func.now, comment="创建时间")
+
+    updated_at: Mapped[datetime] = mapped_column(default=func.now, onupdate=func.now, comment="更新时间")
+
+    deleted_at: Mapped[datetime] = mapped_column(nullable=True, comment="删除时间")
+
+
+class BaseOrmTableWithTS(BaseOrmTable, TimestampColumns):
+    __abstract__ = True
