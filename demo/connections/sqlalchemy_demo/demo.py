@@ -4,11 +4,14 @@
 # @Desc: { sqlalchemy demo }
 # @Date: 2023/09/04 14:22
 import asyncio
-from datetime import datetime
+import uuid
+from typing import List
 
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import func
 
-from py_tools.connections.db.mysql import SQLAlchemyManager, DBManager, BaseOrmTable, BaseOrmTableWithTS
+from connections.sqlalchemy_demo.manager import UserManager, UserFileManager
+from connections.sqlalchemy_demo.table import UserFileTable
+from py_tools.connections.db.mysql import SQLAlchemyManager, DBManager
 
 db_client = SQLAlchemyManager(
     host="127.0.0.1",
@@ -19,45 +22,7 @@ db_client = SQLAlchemyManager(
 )
 
 
-class UserTable(BaseOrmTableWithTS):
-    """用户表"""
-
-    __tablename__ = "user"
-    username: Mapped[str] = mapped_column(default="", comment="用户昵称")
-    password: Mapped[str] = mapped_column(default="", comment="用户密码")
-    phone: Mapped[str] = mapped_column(default="", comment="手机号")
-    email: Mapped[str] = mapped_column(default="", comment="邮箱")
-    avatar: Mapped[str] = mapped_column(default="", comment="头像")
-
-
-class UserFileTable(BaseOrmTable):
-    """用户文件表"""
-
-    __tablename__ = "user_file"
-    filename: Mapped[str] = mapped_column(default="", comment="文件名称")
-    creator: Mapped[int] = mapped_column(default=0, comment="文件创建者")
-    file_suffix: Mapped[str] = mapped_column(default="", comment="文件后缀")
-    file_size: Mapped[int] = mapped_column(default=0, comment="文件大小")
-    oss_key: Mapped[str] = mapped_column(default="", comment="oss key（minio）")
-    is_del: Mapped[int] = mapped_column(default=0, comment="是否删除")
-    deleted_at: Mapped[datetime] = mapped_column(nullable=True, comment="删除时间")
-
-
-class UserManger(DBManager):
-    table = UserTable
-
-
-class UserFileManager(DBManager):
-    orm_table = UserFileTable
-
-
-async def mysql_demo():
-    db_client.init_mysql_engine()
-    DBManager.init_db_client(db_client)
-
-    sql = """select * from user_basic"""
-    ret = await UserManager().run_sql(sql=sql)
-
+async def create_and_transaction_demo():
     async with UserFileManager.transaction() as session:
         await UserFileManager().bulk_insert(
             add_rows=[{"filename": "aaa", "oss_key": uuid.uuid4().hex}], session=session
@@ -78,6 +43,8 @@ async def mysql_demo():
         )
         print("ret", ret)
 
+
+async def query_demo():
     ret = await UserFileManager().query_one(conds=[UserFileTable.filename == "ccc"])
     print("ret", ret)
 
@@ -103,8 +70,10 @@ async def mysql_demo():
     ret = await UserFileManager().query_all(cols=[UserFileTable.id], flat=True)
     print("ret", ret)
 
-    ret = await UserFileManager().update(values={"filename": "hui"}, conds=[UserFileTable.id == 1])
-    print("update ret", ret)
+
+async def delete_demo():
+    file_count = await UserFileManager().query_one(cols=[func.count()], flat=True)
+    print("file_count", file_count)
 
     ret = await UserFileManager().delete_by_id(file_count)
     print("delete_by_id ret", ret)
@@ -123,11 +92,22 @@ async def mysql_demo():
     )
     print("logic_del set logic_field ret", ret)
 
+
+async def update_demo():
+    ret = await UserFileManager().update(values={"filename": "hui"}, conds=[UserFileTable.id == 1])
+    print("update ret", ret)
+
+
+async def list_page_demo():
+    """分页查询demo"""
     total_count, data_list = await UserFileManager().list_page(
         cols=["filename", "oss_key", "file_size"], curr_page=2, page_size=10
     )
     print("total_count", total_count, f"data_list[{len(data_list)}]", data_list)
 
+
+async def run_raw_sql_demo():
+    """运行原生sql demo"""
     count_sql = "select count(*) as total_count from user_file"
     count_ret = await UserFileManager().run_sql(count_sql, query_one=True)
     print("count_ret", count_ret)
@@ -140,11 +120,15 @@ async def mysql_demo():
     data_sql = "select * from user_file where id > :id_val"
     data_ret = await UserFileManager().run_sql(sql=data_sql, params={"id_val": 4})
     print("dict data_ret", data_ret)
-    print(ret)
+
+
+async def curd_demo():
+    db_client.init_mysql_engine()
+    DBManager.init_db_client(db_client)
 
 
 async def main():
-    await mysql_demo()
+    await curd_demo()
 
 
 if __name__ == '__main__':

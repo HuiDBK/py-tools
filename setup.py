@@ -11,7 +11,7 @@ from setuptools import find_packages, setup
 
 class PKGManager:
     name = "hui-tools"
-    version = "0.2.2"
+    version = "0.3.0"
     author = "hui"
     author_email = "huidbk@163.com"
 
@@ -36,6 +36,7 @@ class PKGManager:
         extras_require = {
             "db-orm": ["sqlalchemy[asyncio]==2.0.20", "aiomysql==0.2.0"],
             "db-redis": ["redis>=4.5.4"],
+            "minio": ["minio==7.1.17"],
             "chatbot": ["requests==2.31.0", "cacheout==0.14.1"],
             "http-client": ["httpx==0.24.1", "requests==2.31.0"],
             "time-tools": ["python-dateutil==2.8.2"],
