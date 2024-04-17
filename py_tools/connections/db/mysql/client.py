@@ -8,11 +8,11 @@ import functools
 import logging
 from contextlib import asynccontextmanager
 from datetime import datetime
-from typing import Any, List, Type, TypeVar, Union
+from typing import Any, AsyncIterator, List, Type, TypeVar, Union
 
 from loguru import logger
-from sqlalchemy import Result, column, delete, func, insert, select, text, update
-from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy import Result, column, delete, func, select, text, update
+from sqlalchemy.ext.asyncio import AsyncConnection, AsyncEngine, AsyncSession, async_sessionmaker, create_async_engine
 
 from py_tools.connections.db.mysql import BaseOrmTable
 from py_tools.meta_cls import SingletonMetaCls
@@ -80,6 +80,23 @@ class SQLAlchemyManager(metaclass=SingletonMetaCls):
         )
         return db_url
 
+    def init_db_engine(self, protocol: str):
+        """
+        初始化db引擎
+        Args:
+            protocol: 驱动协议类型
+
+        Returns:
+            self.db_engine
+        """
+        db_url = self.get_db_url(protocol=protocol)
+        self.log.info(f"init_db_engine => {db_url}")
+        self.db_engine = create_async_engine(
+            url=db_url, pool_size=self.pool_size, pool_pre_ping=self.pool_pre_ping, pool_recycle=self.pool_recycle
+        )
+        self.async_session_maker = async_sessionmaker(bind=self.db_engine, expire_on_commit=False)
+        return self.db_engine
+
     def init_mysql_engine(self, protocol: str = "mysql+aiomysql"):
         """
         初始化mysql引擎
@@ -89,13 +106,7 @@ class SQLAlchemyManager(metaclass=SingletonMetaCls):
         Returns:
             self.db_engine
         """
-        db_url = self.get_db_url(protocol=protocol)
-        self.log.info(f"init_mysql_engine => {db_url}")
-        self.db_engine = create_async_engine(
-            url=db_url, pool_size=self.pool_size, pool_pre_ping=self.pool_pre_ping, pool_recycle=self.pool_recycle
-        )
-        self.async_session_maker = async_sessionmaker(bind=self.db_engine, expire_on_commit=False)
-        return self.db_engine
+        return self.init_db_engine(protocol=protocol)
 
 
 class DBManager(metaclass=SingletonMetaCls):
@@ -114,10 +125,18 @@ class DBManager(metaclass=SingletonMetaCls):
         async with cls.DB_CLIENT.async_session_maker.begin() as session:
             yield session
 
+    @classmethod
+    @asynccontextmanager
+    async def connection(cls) -> AsyncIterator[AsyncConnection]:
+        """数据库引擎连接上下文管理器"""
+        async with cls.DB_CLIENT.db_engine.begin() as conn:
+            yield conn
+
     @with_session
     async def bulk_delete_by_ids(
         self,
         pk_ids: list,
+        *,
         orm_table: Type[BaseOrmTable] = None,
         logic_del: bool = False,
         logic_field: str = "deleted_at",
@@ -151,6 +170,7 @@ class DBManager(metaclass=SingletonMetaCls):
     async def delete_by_id(
         self,
         pk_id: int,
+        *,
         orm_table: Type[BaseOrmTable] = None,
         logic_del: bool = False,
         logic_field: str = "deleted_at",
@@ -183,6 +203,7 @@ class DBManager(metaclass=SingletonMetaCls):
     @with_session
     async def delete(
         self,
+        *,
         conds: list = None,
         orm_table: Type[BaseOrmTable] = None,
         logic_del: bool = False,
@@ -193,7 +214,7 @@ class DBManager(metaclass=SingletonMetaCls):
         """
         通用删除
         Args:
-            conds: 条件列表, eg. [UserTable.id == 1]
+            conds: 条件列表, e.g. [UserTable.id == 1]
             orm_table: orm表映射类
             logic_del: 逻辑删除，默认 False 物理删除 True 逻辑删除
             logic_field: 逻辑删除字段 默认 deleted_at
@@ -219,59 +240,64 @@ class DBManager(metaclass=SingletonMetaCls):
         return cursor_result.rowcount
 
     @with_session
-    async def bulk_insert(
+    async def bulk_add(
         self,
-        add_rows: List[dict],
+        table_objs: List[Union[T_BaseOrmTable, dict]],
+        *,
         orm_table: Type[BaseOrmTable] = None,
+        flush: bool = False,
         session: AsyncSession = None,
-    ) -> Union[int, Any]:
+    ) -> List[T_BaseOrmTable]:
         """
         批量插入
         Args:
+            table_objs: orm映射类实例列表
+                e.g. [UserTable(username="hui", age=18), ...] or [{"username": "hui", "age": 18}, ...]
             orm_table: orm表映射类
-            add_rows: 批量添加的数据集, eg. [{"username": "hui", "age": 18}, ...]
+            flush: 刷新对象状态，默认不刷新
             session: 数据库会话对象，如果为 None，则通过装饰器在方法内部开启新的事务
 
         Returns:
-            成功插入的影响行数
+            成功插入的对象列表
         """
         orm_table = orm_table or self.orm_table
-        sql = insert(orm_table).values(add_rows)
-        result = await session.execute(sql)
-        return result.rowcount
+        if all(isinstance(table_obj, dict) for table_obj in table_objs):
+            # 字典列表转成orm映射类实例列表处理
+            table_objs = [orm_table(**table_obj) for table_obj in table_objs]
 
-    @with_session
-    async def bulk_add(self, table_objs: List[T_BaseOrmTable], session: AsyncSession = None) -> int:
-        """
-        批量插入
-        Args:
-            table_objs: orm映射类实例列表, eg. [UserTable(username="hui", age=18), ...]
-            session: 数据库会话对象，如果为 None，则通过装饰器在方法内部开启新的事务
-
-        Returns:
-            成功插入的影响行数
-        """
         session.add_all(table_objs)
-        return len(table_objs)
+        if flush:
+            await session.flush(table_objs)
+
+        return table_objs
 
     @with_session
-    async def add(self, table_obj: T_BaseOrmTable, session: AsyncSession = None) -> int:
+    async def add(
+        self, table_obj: [T_BaseOrmTable, dict], *, orm_table: Type[BaseOrmTable] = None, session: AsyncSession = None
+    ) -> int:
         """
         插入一条数据
         Args:
-            table_obj: orm映射类实例对象, eg. UserTable(username="hui", age=18)
+            table_obj: orm映射类实例对象, eg. UserTable(username="hui", age=18) or {"username": "hui", "age": 18}
+            orm_table: orm表映射类
             session: 数据库会话对象，如果为 None，则通过装饰器在方法内部开启新的事务
 
         Returns: 新增的id
             table_obj.id
         """
+        orm_table = orm_table or self.orm_table
+        if isinstance(table_obj, dict):
+            table_obj = orm_table(**table_obj)
+
         session.add(table_obj)
+        await session.flush(objects=[table_obj])  # 刷新对象状态，获取新增的id
         return table_obj.id
 
     @with_session
     async def query_by_id(
         self,
         pk_id: int,
+        *,
         orm_table: Type[BaseOrmTable] = None,
         session: AsyncSession = None,
     ) -> Union[T_BaseOrmTable, None]:
@@ -292,6 +318,7 @@ class DBManager(metaclass=SingletonMetaCls):
     @with_session
     async def _query(
         self,
+        *,
         cols: list = None,
         orm_table: BaseOrmTable = None,
         conds: list = None,
@@ -339,6 +366,7 @@ class DBManager(metaclass=SingletonMetaCls):
     @with_session
     async def query_one(
         self,
+        *,
         cols: list = None,
         orm_table: Type[BaseOrmTable] = None,
         conds: list = None,
@@ -356,7 +384,7 @@ class DBManager(metaclass=SingletonMetaCls):
             flat: 单字段时扁平化处理
             session: 数据库会话对象，如果为 None，则通过装饰器在方法内部开启新的事务
 
-        Notes:
+        Examples:
             # 指定列名
             ret = await UserManager().query_one(cols=["username", "age"], conds=[UserTable.id == 1])
             sql => select username, age from user where id=1
@@ -398,6 +426,7 @@ class DBManager(metaclass=SingletonMetaCls):
     @with_session
     async def query_all(
         self,
+        *,
         cols: list = None,
         orm_table: BaseOrmTable = None,
         conds: list = None,
@@ -503,8 +532,33 @@ class DBManager(metaclass=SingletonMetaCls):
         return cursor_result.rowcount
 
     @with_session
+    async def update_or_add(
+        self,
+        table_obj: [T_BaseOrmTable, dict],
+        *,
+        orm_table: Type[BaseOrmTable] = None,
+        session: AsyncSession = None,
+        **kwargs,
+    ):
+        """
+        指定对象更新or添加数据
+        Args:
+            table_obj: 映射类实例对象 or dict，
+                e.g. UserTable(username="hui", age=18) or {"username": "hui", "v": 18, ...}
+            orm_table: ORM表映射类
+            session: 数据库会话对象，如果为 None，则在方法内部开启新的事务
+
+        Returns:
+        """
+        orm_table = orm_table or self.orm_table
+        if isinstance(table_obj, dict):
+            table_obj = orm_table(**table_obj)
+
+        return await session.merge(table_obj, **kwargs)
+
+    @with_session
     async def run_sql(
-        self, sql: str, params: dict = None, query_one: bool = False, session: AsyncSession = None
+        self, sql: str, *, params: dict = None, query_one: bool = False, session: AsyncSession = None
     ) -> Union[dict, List[dict]]:
         """
         执行并提交单条sql

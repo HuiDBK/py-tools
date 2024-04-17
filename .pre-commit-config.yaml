@@ -16,7 +16,7 @@ repos:
           '--statistics',
           '--max-line-length=127',
           '--max-complexity=10',
-          '--extend-ignore=E203,E402,F401',
+          '--extend-ignore=E203,E402,F401,W291',
         ] # 默认最大长度79，复杂度和可选忽略错误可以看情况更新，其默认值可通过flake8 -h查看
         exclude: ^venv/ # (^foo/|^bar/)
 

@@ -4,7 +4,7 @@
 # @Desc: { 模块描述 }
 # @Date: 2023/08/17 23:55
 from datetime import datetime
-from sqlalchemy import func
+
 from sqlalchemy.ext.asyncio import AsyncAttrs
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
@@ -15,6 +15,9 @@ class BaseOrmTable(AsyncAttrs, DeclarativeBase):
     __abstract__ = True
 
     id: Mapped[int] = mapped_column(primary_key=True, comment="主键ID")
+
+    def __repr__(self):
+        return str(self.to_dict())
 
     def to_dict(self, alias_dict: dict = None, exclude_none=True) -> dict:
         """
@@ -29,22 +32,21 @@ class BaseOrmTable(AsyncAttrs, DeclarativeBase):
         if exclude_none:
             return {
                 alias_dict.get(c.name, c.name): getattr(self, c.name)
-                for c in self.__table__.columns if getattr(self, c.name) is not None
+                for c in self.__table__.columns
+                if getattr(self, c.name) is not None
             }
         else:
-            return {
-                alias_dict.get(c.name, c.name): getattr(self, c.name, None)
-                for c in self.__table__.columns
-            }
+            return {alias_dict.get(c.name, c.name): getattr(self, c.name, None) for c in self.__table__.columns}
 
 
 class TimestampColumns(AsyncAttrs, DeclarativeBase):
     """时间戳相关列"""
+
     __abstract__ = True
 
-    created_at: Mapped[datetime] = mapped_column(default=func.now, comment="创建时间")
+    created_at: Mapped[datetime] = mapped_column(default=datetime.now, comment="创建时间")
 
-    updated_at: Mapped[datetime] = mapped_column(default=func.now, onupdate=func.now, comment="更新时间")
+    updated_at: Mapped[datetime] = mapped_column(default=datetime.now, onupdate=datetime.now, comment="更新时间")
 
     deleted_at: Mapped[datetime] = mapped_column(nullable=True, comment="删除时间")
 

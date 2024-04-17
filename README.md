@@ -280,10 +280,12 @@ class DBManager(metaclass=SingletonMetaCls):
 
 部分使用demo，详情请到 demo/connections/sqlalchemy_demo/demo.py 文件查阅
 ```python
+import uuid
+
 async def create_and_transaction_demo():
     async with UserFileManager.transaction() as session:
-        await UserFileManager().bulk_insert(
-            add_rows=[{"filename": "aaa", "oss_key": uuid.uuid4().hex}], session=session
+        await UserFileManager().bulk_add(
+            table_objs=[{"filename": "aaa", "oss_key": uuid.uuid4().hex}], session=session
         )
         user_file_obj = UserFileTable(filename="eee", oss_key=uuid.uuid4().hex)
         file_id = await UserFileManager().add(table_obj=user_file_obj, session=session)
