@@ -11,7 +11,7 @@ from setuptools import find_packages, setup
 
 class PKGManager:
     name = "hui-tools"
-    version = "0.3.2"
+    version = "0.4.0"
     author = "hui"
     author_email = "huidbk@163.com"
 
@@ -25,7 +25,7 @@ class PKGManager:
     @classmethod
     def get_install_requires(cls):
         """获取必须安装依赖"""
-        requires = ["loguru>=0.7.0,<0.8", "pydantic>=2.1.1,<3"]
+        requires = ["loguru>=0.7.0,<0.8", "pydantic>=2.1.1,<3", "asgiref==3.8.1"]
         return requires
 
     @classmethod

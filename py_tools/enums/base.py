@@ -27,12 +27,13 @@ class BaseEnum(Enum):
         return obj
 
     @classmethod
-    def get_members(cls, exclude_enums: list = None, only_value: bool = False) -> list:
+    def get_members(cls, exclude_enums: list = None, only_value: bool = False, only_desc: bool = False) -> list:
         """
         获取枚举的所有成员
         Args:
             exclude_enums: 排除的枚举类列表
-            only_value: 是否只需要成员的值，默认False
+            only_value: 只需要成员的值，默认False
+            only_desc: 只需要成员的desc，默认False
 
         Returns: 枚举成员列表 or 枚举成员值列表
 
@@ -45,6 +46,12 @@ class BaseEnum(Enum):
         if only_value:
             # 只需要成员的值
             members = [member.value for member in members]
+            return members
+
+        if only_desc:
+            # 只需要成员的desc
+            members = [member.desc for member in members]
+            return members
 
         return members
 
@@ -55,6 +62,16 @@ class BaseEnum(Enum):
     @classmethod
     def get_names(cls):
         return list(cls._member_names_)
+
+    @classmethod
+    def get_desc(cls, exclude_enums: list = None):
+        return cls.get_members(exclude_enums=exclude_enums, only_desc=True)
+
+    @classmethod
+    def get_value_by_desc(cls, enum_desc):
+        members = cls.get_members()
+        member_dic = {member.desc: member.value for member in members}
+        return member_dic.get(enum_desc)
 
 
 class StrEnum(str, BaseEnum):

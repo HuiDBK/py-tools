@@ -11,3 +11,4 @@ pydantic==2.1.1
 sqlalchemy[asyncio]==2.0.20
 aiomysql==0.2.0
 minio==7.1.17
+asgiref==3.8.1

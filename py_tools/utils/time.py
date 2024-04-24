@@ -6,11 +6,9 @@
 
 import time
 from datetime import datetime
-from typing import Type
 
 from dateutil.relativedelta import relativedelta
 
-from py_tools.data_models.time import DateDiff
 from py_tools.meta_cls import SingletonMetaCls
 from py_tools.enums import TimeFormatEnum
 
@@ -97,7 +95,7 @@ class TimeUtil(metaclass=SingletonMetaCls):
         """获取 datetime 对象的时间戳"""
         return self.datetime_obj.timestamp()
 
-    def difference_in_detail(self, datetime_obj: datetime):
+    def date_diff(self, datetime_obj: datetime):
         """
         计算两个日期之间的差值详情
         Args:
@@ -106,15 +104,7 @@ class TimeUtil(metaclass=SingletonMetaCls):
         Returns: DateDiff
         """
         delta = relativedelta(self.datetime_obj, datetime_obj)
-
-        return DateDiff(
-            years=abs(delta.years),
-            months=abs(delta.months),
-            days=abs(delta.days),
-            hours=abs(delta.hours),
-            minutes=abs(delta.minutes),
-            seconds=abs(delta.seconds),
-        )
+        return delta
 
     def start_of_week(self) -> datetime:
         """获取本周的开始日期（周一）"""

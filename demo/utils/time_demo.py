@@ -55,7 +55,7 @@ def time_util_demo():
     print(f"从 {date1} 到 {date2} 之间有 {weekday_count} 个工作日。(不包含末尾日期)")
 
     # 获取两个日期之间的差值
-    date_diff = time_util.difference_in_detail(date2)
+    date_diff = time_util.date_diff(date2)
     print(date_diff)
 
     datetime_ret = time_util.datetime_to_str(format_str=TimeFormatEnum.DateTime_CN)
