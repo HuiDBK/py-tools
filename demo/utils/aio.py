@@ -8,7 +8,7 @@ import asyncio
 import time
 from concurrent.futures import ThreadPoolExecutor
 
-from py_tools.utils.aio import run_bg_task, async_run, sync_run, async_to_sync
+from py_tools.utils.aio import run_bg_task, async_run, sync_run, async_to_sync, sync_to_async
 
 BASE_EXECUTOR = ThreadPoolExecutor(max_workers=3)
 
@@ -41,6 +41,8 @@ async def main():
 
     ret = await async_run(sync_bg_task, name="async to sync", age=18, executor=BASE_EXECUTOR)
     print(ret)
+
+    sync_to_async(sync_bg_task)(name="sync to async", age=18)
 
 
 def async_to_sync_demo():

@@ -13,7 +13,7 @@
 ```python
 pip install hui-tools
 ```
-默认安装只会安装loguru的日志库和pydantic，使用的功能较少
+默认安装只会安装loguru的日志库和pydantic以及asgiref，使用的功能较少
 
 
 ### 全部安装
@@ -43,250 +43,35 @@ extras_require = {
 > 所有功能都是从 py_tools 包中导入使用
 > 详细使用请查看项目的DEMO： https://github.com/HuiDBK/py-tools/tree/master/demo
 
-
-sqlalchemy 通用DBManager封装细节与使用Demo
-部分封装展示
+生成python项目结构模板
 ```python
-T_BaseOrmTable = TypeVar('T_BaseOrmTable', bound=BaseOrmTable)
-T_Hints = TypeVar("T_Hints")  # 用于修复被装饰的函数参数提示，让IDE有类型提示
-
-
-def with_session(method) -> T_Hints:
-    """
-    兼容事务
-    Args:
-        method: orm 的 crud
-
-    Notes:
-        方法中没有带事务连接则，则构造
-
-    Returns:
-    """
-
-    @functools.wraps(method)
-    async def wrapper(db_manager, *args, **kwargs):
-        session = kwargs.get("session") or None
-        if session:
-            return await method(db_manager, *args, **kwargs)
-        else:
-            async with db_manager.transaction() as session:
-                kwargs["session"] = session
-                return await method(db_manager, *args, **kwargs)
-
-    return wrapper
-
-
-class DBManager(metaclass=SingletonMetaCls):
-    DB_CLIENT: SQLAlchemyManager = None
-    orm_table: Type[BaseOrmTable] = None
-
-    @classmethod
-    def init_db_client(cls, db_client: SQLAlchemyManager):
-        cls.DB_CLIENT = db_client
-        return cls.DB_CLIENT
-
-    @classmethod
-    @asynccontextmanager
-    async def transaction(cls):
-        """事务上下文管理器"""
-        async with cls.DB_CLIENT.async_session_maker.begin() as session:
-            yield session
-
-    @with_session
-    async def _query(
-            self,
-            cols: list = None,
-            orm_table: BaseOrmTable = None,
-            conds: list = None,
-            orders: list = None,
-            limit: int = None,
-            offset: int = 0,
-            session: AsyncSession = None,
-    ) -> Result[Any]:
-        """
-        通用查询
-        Args:
-            cols: 查询的列表字段
-            orm_table: orm表映射类
-            conds: 查询的条件列表
-            orders: 排序列表, 默认id升序
-            limit: 限制数量大小
-            offset: 偏移量
-            session: 数据库会话对象，如果为 None，则通过装饰器在方法内部开启新的事务
-
-        Returns: 查询结果集
-            cursor_result
-        """
-        cols = cols or []
-        cols = [column(col_obj) if isinstance(col_obj, str) else col_obj for col_obj in cols]  # 兼容字符串列表
-
-        conditions = conds or []
-        orders = orders or [column("id")]
-        orm_table = orm_table or self.orm_table
-
-        # 构造查询
-        if cols:
-            # 查询指定列
-            query_sql = select(*cols).select_from(orm_table).where(*conditions).order_by(*orders)
-        else:
-            # 查询全部字段
-            query_sql = select(orm_table).where(*conditions).order_by(*orders)
-
-        if limit:
-            query_sql = query_sql.limit(limit).offset(offset)
-
-        # 执行查询
-        cursor_result = await session.execute(query_sql)
-        return cursor_result
-
-    @with_session
-    async def query_one(
-            self,
-            cols: list = None,
-            orm_table: Type[BaseOrmTable] = None,
-            conds: list = None,
-            orders: list = None,
-            flat: bool = False,
-            session: AsyncSession = None,
-    ) -> Union[dict, T_BaseOrmTable, Any]:
-        """
-        查询单行
-        Args:
-            cols: 查询的列表字段
-            orm_table: orm表映射类
-            conds: 查询的条件列表
-            orders: 排序列表
-            flat: 单字段时扁平化处理
-            session: 数据库会话对象，如果为 None，则通过装饰器在方法内部开启新的事务
-
-        Notes:
-            # 指定列名
-            ret = await UserManager().query_one(cols=["username", "age"], conds=[UserTable.id == 1])
-            sql => select username, age from user where id=1
-            ret => {"username": "hui", "age": 18}
-
-            # 指定列名，单字段扁平化处理
-            ret = await UserManager().query_one(cols=["username"], conds=[UserTable.id == 1])
-            sql => select username from user where id=1
-            ret => {"username": "hui"} => "hui"
-
-            # 计算总数
-            ret = await UserManager().query_one(cols=[func.count()])
-            sql => select count(*) as count from user
-            ret => {"count": 10} => 10
-
-            # 不指定列名，查询全部字段, 返回表实例对象
-            ret = await UserManager().query_one(conds=[UserTable.id == 1])
-            sql => select id, username, age from user where id=1
-            ret => UserTable(id=1, username="hui", age=18)
-
-        Returns:
-            Union[dict, BaseOrmTable(), Any(flat=True)]
-        """
-        cursor_result = await self._query(cols=cols, orm_table=orm_table, conds=conds, orders=orders, session=session)
-        if cols:
-            if flat and len(cols) == 1:
-                # 单行单字段查询: 直接返回字段结果
-                # eg: select count(*) as count from user 从 {"count": 100} => 100
-                # eg: select username from user where id=1 从 {"username": "hui"} => "hui"
-                return cursor_result.scalar_one()
-
-            # eg: select username, age from user where id=1 => {"username": "hui", "age": 18}
-            return cursor_result.mappings().one() or {}
-        else:
-            # 未指定列名查询默认全部字段，返回的是表实例对象 BaseOrmTable()
-            # eg: select id, username, age from user where id=1 => UserTable(id=1, username="hui", age=18)
-            return cursor_result.scalar_one()
-        
-    async def list_page(
-            self,
-            cols: list = None,
-            orm_table: BaseOrmTable = None,
-            conds: list = None,
-            orders: list = None,
-            curr_page: int = 1,
-            page_size: int = 20,
-            session: AsyncSession = None,
-    ):
-        """
-        单表通用分页查询
-        Args:
-            cols: 查询的列表字段
-            orm_table: orm表映射类
-            conds: 查询的条件列表
-            orders: 排序列表
-            curr_page: 页码
-            page_size: 每页数量
-            session: 数据库会话对象，如果为 None，则通过装饰器在方法内部开启新的事务
-
-        Returns: total_count, data_list
-        """
-        conds = conds or []
-        orders = orders or [column("id")]
-        orm_table = orm_table or self.orm_table
-
-        limit = page_size
-        offset = (curr_page - 1) * page_size
-        total_count, data_list = await asyncio.gather(
-            self.query_one(
-                cols=[func.count()], orm_table=orm_table, conds=conds, orders=orders, flat=True, session=session
-            ),
-            self.query_all(
-                cols=cols, orm_table=orm_table, conds=conds, orders=orders, limit=limit, offset=offset, session=session
-            ),
-        )
-
-        return total_count, data_list
-    
-    @with_session
-    async def delete(
-            self,
-            conds: list = None,
-            orm_table: Type[BaseOrmTable] = None,
-            logic_del: bool = False,
-            logic_field: str = "deleted_at",
-            logic_del_set_value: Any = None,
-            session: AsyncSession = None,
-    ):
-        """
-        通用删除
-        Args:
-            conds: 条件列表, eg. [UserTable.id == 1]
-            orm_table: orm表映射类
-            logic_del: 逻辑删除，默认 False 物理删除 True 逻辑删除
-            logic_field: 逻辑删除字段 默认 deleted_at
-            logic_del_set_value: 逻辑删除字段设置的值
-            session: 数据库会话对象，如果为 None，则通过装饰器在方法内部开启新的事务
-
-        Returns: 删除的记录数
-        """
-        orm_table = orm_table or self.orm_table
-
-        if logic_del:
-            # 执行逻辑删除操作
-            logic_del_info = dict()
-            logic_del_info[logic_field] = logic_del_set_value or datetime.now()
-            delete_stmt = update(orm_table).where(*conds).values(**logic_del_info)
-        else:
-            # 执行物理删除操作
-            delete_stmt = delete(orm_table).where(*conds)
-
-        cursor_result = await session.execute(delete_stmt)
-
-        # 返回影响的记录数
-        return cursor_result.rowcount
+py_tools make_project WebDemo
 ```
 
-
-部分使用demo，详情请到 demo/connections/sqlalchemy_demo/demo.py 文件查阅
+mysql数据库操作demo
 ```python
+import asyncio
 import uuid
+from typing import List
+
+from connections.sqlalchemy_demo.manager import UserFileManager
+from connections.sqlalchemy_demo.table import UserFileTable
+from sqlalchemy import func
+
+from py_tools.connections.db.mysql import BaseOrmTable, DBManager, SQLAlchemyManager
+
+db_client = SQLAlchemyManager(
+    host="127.0.0.1",
+    port=3306,
+    user="root",
+    password="123456",
+    db_name="hui-demo",
+)
+
 
 async def create_and_transaction_demo():
     async with UserFileManager.transaction() as session:
-        await UserFileManager().bulk_add(
-            table_objs=[{"filename": "aaa", "oss_key": uuid.uuid4().hex}], session=session
-        )
+        await UserFileManager().bulk_add(table_objs=[{"filename": "aaa", "oss_key": uuid.uuid4().hex}], session=session)
         user_file_obj = UserFileTable(filename="eee", oss_key=uuid.uuid4().hex)
         file_id = await UserFileManager().add(table_obj=user_file_obj, session=session)
         print("file_id", file_id)
@@ -297,9 +82,7 @@ async def create_and_transaction_demo():
         # a = 1 / 0
 
         ret = await UserFileManager().query_one(
-            cols=[UserFileTable.filename, UserFileTable.oss_key],
-            conds=[UserFileTable.filename == "ccc"],
-            session=session
+            cols=[UserFileTable.filename, UserFileTable.oss_key], conds=[UserFileTable.filename == "ccc"], session=session
         )
         print("ret", ret)
 
@@ -311,11 +94,7 @@ async def query_demo():
     file_count = await UserFileManager().query_one(cols=[func.count()], flat=True)
     print("str col one ret", file_count)
 
-    filename = await UserFileManager().query_one(
-        cols=[UserFileTable.filename],
-        conds=[UserFileTable.id == 2],
-        flat=True
-    )
+    filename = await UserFileManager().query_one(cols=[UserFileTable.filename], conds=[UserFileTable.id == 2], flat=True)
     print("filename", filename)
 
     ret = await UserFileManager().query_all(cols=[UserFileTable.filename, UserFileTable.oss_key])
@@ -347,52 +126,51 @@ async def run_raw_sql_demo():
 
     data_sql = "select * from user_file where id > :id_val and file_size >= :file_size_val"
     params = {"id_val": 20, "file_size_val": 0}
-    data_ret = await UserFileManager().run_sql(data_sql, params)
+    data_ret = await UserFileManager().run_sql(data_sql, params=params)
     print("dict data_ret", data_ret)
 
-    data_sql = "select * from user_file where id > :id_val"
-    data_ret = await UserFileManager().run_sql(sql=data_sql, params={"id_val": 4})
-    print("dict data_ret", data_ret)
-
-```
-
-
-http 客户端举例
-```python
-import asyncio
-
-from py_tools.enums import RespFmt
-from py_tools.logging import logger
-from py_tools.connections.http import HttpClient, AsyncHttpClient
-
-
-async def async_http_client_demo():
-    logger.debug("async_http_client_demo")
-    url = "https://github.com/HuiDBK"
-
-    # 调用
-    data = await AsyncHttpClient().get(url, resp_fmt=RespFmt.TEXT)
-    logger.debug(data)
+    # 连表查询
+    data_sql = """
+    select
+        user.id as user_id,
+        username,
+        user_file.id as file_id,
+        filename,
+        oss_key
+    from 
+        user_file
+        join user on user.id = user_file.creator
+    where 
+        user_file.creator = :user_id
+    """
+    data_ret = await UserFileManager().run_sql(data_sql, params={"user_id": 1})
+    print("join sql data_ret", data_ret)
 
 
-def sync_http_client_demo():
-    logger.debug("sync_http_client_demo")
-    url = "https://github.com/HuiDBK"
-    text_content = HttpClient().get(url).text
-    logger.debug(text_content)
+async def curd_demo():
+    await create_and_transaction_demo()
+    await query_demo()
+    await list_page_demo()
+    await run_raw_sql_demo()
+
+
+async def create_tables():
+    # 根据映射创建库表
+    async with DBManager.connection() as conn:
+        await conn.run_sync(BaseOrmTable.metadata.create_all)
 
 
 async def main():
-    await async_http_client_demo()
+    db_client.init_mysql_engine()
+    DBManager.init_db_client(db_client)
+    await create_tables()
+    await curd_demo()
 
-    sync_http_client_demo()
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     asyncio.run(main())
 
 ```
-
 
 ## Todo List
 
@@ -412,6 +190,10 @@ if __name__ == '__main__':
 - 常用正则工具类
 
 ### 装饰器
+1. [x] 超时装饰器
+2. [x] 重试装饰器
+3. [x] 缓存装饰器
+4. [x] 异步执行装饰器
 
 ### 枚举
 
