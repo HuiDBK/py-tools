@@ -1,6 +1,6 @@
-from py_tools.logging import logger
-
 from src.utils import context_util
+
+from py_tools.logging import logger
 
 
 def _logger_filter(record):

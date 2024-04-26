@@ -1,4 +1,3 @@
-
 # mysql服务配置
 mysql_host = "127.0.0.1"
 mysql_port = 3306

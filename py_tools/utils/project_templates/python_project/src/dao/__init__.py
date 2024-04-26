@@ -1,7 +1,7 @@
-from py_tools.connections.db.mysql import DBManager, SQLAlchemyManager
-
 from src import settings
 from src.dao.redis import RedisManager
+
+from py_tools.connections.db.mysql import DBManager, SQLAlchemyManager
 
 
 async def init_orm():

@@ -1,5 +1,6 @@
-from py_tools.connections.db.mysql import BaseOrmTableWithTS
 from sqlalchemy.orm import Mapped, mapped_column
+
+from py_tools.connections.db.mysql import BaseOrmTableWithTS
 
 
 class UserTable(BaseOrmTableWithTS):

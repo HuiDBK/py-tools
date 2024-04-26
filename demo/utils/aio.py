@@ -8,7 +8,7 @@ import asyncio
 import time
 from concurrent.futures import ThreadPoolExecutor
 
-from py_tools.utils.aio import run_bg_task, async_run, sync_run, async_to_sync, sync_to_async
+from py_tools.utils.aio import async_run, async_to_sync, run_bg_task, sync_run, sync_to_async
 
 BASE_EXECUTOR = ThreadPoolExecutor(max_workers=3)
 
@@ -53,6 +53,6 @@ def async_to_sync_demo():
     print(ret)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     asyncio.run(main())
     async_to_sync_demo()

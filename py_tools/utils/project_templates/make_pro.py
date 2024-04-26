@@ -4,9 +4,10 @@
 # @File: project_template.py
 # @Desc: { 项目模板工具模块 }
 # @Date: 2024/04/26 17:46
-import os
 import argparse
+import os
 import shutil
+
 from loguru import logger
 
 template_dir = os.path.dirname(__file__)
@@ -60,17 +61,17 @@ def make_project_java(args):
 
 
 def make_project():
-    parser = argparse.ArgumentParser(description='Generate project structure.')
-    subparsers = parser.add_subparsers(dest='subcommand')
+    parser = argparse.ArgumentParser(description="Generate project structure.")
+    subparsers = parser.add_subparsers(dest="subcommand")
 
-    project_parser = subparsers.add_parser('make_project')
-    project_parser.add_argument('project_name', help='Name of the project')
-    project_parser.add_argument('--python', action='store_true', help='Generate Python project structure')
-    project_parser.add_argument('--java', action='store_true', help='Generate Java project structure')
+    project_parser = subparsers.add_parser("make_project")
+    project_parser.add_argument("project_name", help="Name of the project")
+    project_parser.add_argument("--python", action="store_true", help="Generate Python project structure")
+    project_parser.add_argument("--java", action="store_true", help="Generate Java project structure")
 
     args = parser.parse_args()
 
-    if args.subcommand == 'make_project':
+    if args.subcommand == "make_project":
         if args.python:
             make_project_python(args)
         elif args.java:

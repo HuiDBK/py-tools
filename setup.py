@@ -66,11 +66,7 @@ def main():
         ],
         extras_require=PKGManager.get_extras_require(),
         python_requires=">=3.7",
-        entry_points={
-            'console_scripts': [
-                'py_tools = py_tools.utils.project_templates:make_project'
-            ]
-        },
+        entry_points={"console_scripts": ["py_tools = py_tools.utils.project_templates:make_project"]},
         include_package_data=True,
     )
 
