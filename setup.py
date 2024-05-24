@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # @Author: Hui
-# @Desc: { 时间工具类模块 }
+# @Desc: { pypi打包模块 }
 # @Date: 2023/9/04 19:59
 import operator
 from functools import reduce
@@ -11,7 +11,7 @@ from setuptools import find_packages, setup
 
 class PKGManager:
     name = "hui-tools"
-    version = "0.4.1"
+    version = "0.4.2"
     author = "hui"
     author_email = "huidbk@163.com"
 
@@ -25,7 +25,15 @@ class PKGManager:
     @classmethod
     def get_install_requires(cls):
         """获取必须安装依赖"""
-        requires = ["loguru>=0.7.0,<0.8", "pydantic>=2.1.1,<3", "asgiref==3.8.1"]
+        requires = [
+            "loguru>=0.7.0,<0.8",
+            "pydantic>=2.1.1,<3",
+            "asgiref==3.8.1",
+            "python-dateutil==2.8.2",
+            "requests==2.31.0",
+            "aiohttp==3.9.5",
+            "cacheout==0.14.1",
+        ]
         return requires
 
     @classmethod
@@ -36,10 +44,8 @@ class PKGManager:
         extras_require = {
             "db-orm": ["sqlalchemy[asyncio]==2.0.20", "aiomysql==0.2.0"],
             "db-redis": ["redis>=4.5.4"],
+            "cache-proxy": ["redis>=4.5.4", "python-memcached==1.62", "cacheout==0.14.1"],
             "minio": ["minio==7.1.17"],
-            "chatbot": ["requests==2.31.0", "cacheout==0.14.1"],
-            "http-client": ["httpx==0.24.1", "requests==2.31.0"],
-            "time-tools": ["python-dateutil==2.8.2"],
             "excel-tools": ["pandas==1.3.5", "openpyxl==3.0.10"],
         }
 

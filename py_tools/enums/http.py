@@ -15,10 +15,3 @@ class HttpMethod(BaseEnum):
     DELETE = "DELETE"
     HEAD = "HEAD"
     OPTIONS = "OPTIONS"
-
-
-class RespFmt(BaseEnum):
-    """http响应格式"""
-    JSON = "json"
-    BYTES = "bytes"
-    TEXT = "text"

@@ -13,8 +13,14 @@
 ```python
 pip install hui-tools
 ```
-默认安装只会安装loguru的日志库和pydantic以及asgiref，使用的功能较少
-
+默认安装如下功能可以使用
+- 时间工具类
+- http客户端
+- 同步异步互转装饰器
+- 常用枚举
+- pydantic
+- loguru的日志器
+- 等...
 
 ### 全部安装
 ```python
@@ -31,10 +37,8 @@ pip install hui-tools[db-orm, db-redis, excel-tools]
 extras_require = {
     "db-orm": ["sqlalchemy[asyncio]==2.0.20", "aiomysql==0.2.0"], # 数据库orm
     "db-redis": ["redis>=4.5.4"], # redis
+    "cache-proxy": ["redis>=4.5.4", "python-memcached==1.62", "cacheout==0.14.1"], # 缓存代理
     "minio": ["minio==7.1.17"],
-    "chatbot": ["requests==2.31.0", "cacheout==0.14.1"], # 飞书、钉钉、企业微信机器人通知
-    "http-client": ["httpx==0.24.1", "requests==2.31.0"], # http 同步、异步客户端
-    "time-tools": ["python-dateutil==2.8.2"], # 时间工具类
     "excel-tools": ["pandas==1.3.5", "openpyxl==3.0.10"], # excel工具类
 }
 ```

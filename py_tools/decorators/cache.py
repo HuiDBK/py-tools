@@ -11,6 +11,7 @@ from datetime import timedelta
 from typing import Union
 
 import cacheout
+import memcache
 from pydantic import BaseModel, Field
 from redis import Redis
 from redis import asyncio as aioredis
@@ -78,6 +79,15 @@ class MemoryCacheProxy(BaseCacheProxy):
 MEMORY_PROXY = MemoryCacheProxy(cache_client=cacheout.Cache(maxsize=1024))
 
 
+class MemcacheCacheProxy(BaseCacheProxy):
+
+    def __init__(self, cache_client: memcache.Client):
+        super().__init__(cache_client)
+
+    def set(self, key, value, ttl):
+        self.cache_client.set(key, value, time=ttl)
+
+
 def cache_json(
     cache_proxy: BaseCacheProxy = MEMORY_PROXY,
     key_prefix: str = constants.CACHE_KEY_PREFIX,
@@ -100,7 +110,7 @@ def cache_json(
         def _gen_key(*args, **kwargs):
             """生成缓存的key"""
 
-            # 没有传递key信息，根据函数信息与参数生成
+            # 根据函数信息与参数生成
             # key => 函数所在模块:函数名:函数位置参数:函数关键字参数 进行hash
             param_args_str = ",".join([str(arg) for arg in args])
             param_kwargs_str = ",".join(sorted([f"{k}:{v}" for k, v in kwargs.items()]))
