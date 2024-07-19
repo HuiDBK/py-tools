@@ -5,8 +5,11 @@
 # @Date: 2023/08/10 11:39
 import asyncio
 
+import aiohttp
+
+from py_tools.connections.http import AsyncHttpClient, HttpClient
 from py_tools.logging import logger
-from py_tools.connections.http import HttpClient, AsyncHttpClient
+from py_tools.utils.aio import run_jobs
 
 
 async def async_http_client_demo():
@@ -24,6 +27,25 @@ async def async_http_client_demo():
     # logger.debug(f"text_data {text_data}")
     # logger.debug(f"byte_data {byte_data}")
 
+    # 上传文件
+    form = aiohttp.FormData()
+    file_path = "../../README.md"
+    form.add_field("file", open(file_path, "rb"), filename="new_name.md", content_type="application/octet-stream")
+    url = "http://localhost:8000/file_upload/file_params"
+    upload_ret = await AsyncHttpClient().post(url=url, data=form).json()
+    logger.debug(f"upload_ret {upload_ret}")
+
+    # file_path
+    upload_ret = await AsyncHttpClient().upload_file(url=url, file=file_path, filename="hui.md").json()
+    logger.debug(f"upload_ret {upload_ret}")
+
+    # file_bytes
+    with open(file_path, "rb") as f:
+        file_bytes = f.read()
+
+    upload_ret = await AsyncHttpClient().upload_file(url=url, file=file_bytes, filename="hui_bytes.md").json()
+    logger.debug(f"upload_ret {upload_ret}")
+
     # 流式调用
     async for chunk in AsyncHttpClient().get(url).stream():
         print(chunk)
@@ -39,13 +61,15 @@ def sync_http_client_demo():
 
 
 async def main():
-    await asyncio.gather(*[async_http_client_demo(), async_http_client_demo()])
-    await async_http_client_demo()
+    jobs = [async_http_client_demo(), async_http_client_demo()]
+    # await asyncio.gather(*jobs)
+    await run_jobs(jobs, show_progress=True)
+    # await async_http_client_demo()
 
-    sync_http_client_demo()
+    # sync_http_client_demo()
 
     await AsyncHttpClient.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     asyncio.run(main())

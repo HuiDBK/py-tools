@@ -3,13 +3,16 @@
 # @Author: Hui
 # @Desc: { http客户端 }
 # @Date: 2023/08/10 09:33
-import aiohttp
 from datetime import timedelta
+from pathlib import Path
+from typing import Union
 
+import aiohttp
 import requests
 from aiohttp import ClientResponse
 
 from py_tools.enums import HttpMethod
+from py_tools.utils.file import FileUtil
 
 
 class AsyncRequest:
@@ -73,6 +76,7 @@ class AsyncHttpClient:
         default_headers: 默认请求头字典
         new_session: 是否使用的新的客户端，默认共享一个 ClientSession
     """
+
     # aiohttp 异步客户端
     client_session: aiohttp.ClientSession = None
     client_session_set = set()
@@ -86,9 +90,7 @@ class AsyncHttpClient:
 
     async def _get_client_session(self):
         if self.new_session:
-            client_session = aiohttp.ClientSession(
-                headers=self.default_headers, timeout=self.default_timeout, **self.kwargs
-            )
+            client_session = aiohttp.ClientSession(headers=self.default_headers, timeout=self.default_timeout, **self.kwargs)
             self.client_session_set.add(client_session)
             return client_session
 
@@ -107,14 +109,14 @@ class AsyncHttpClient:
             await client_session.close()
 
     async def _request(
-            self,
-            method: HttpMethod,
-            url: str,
-            params: dict = None,
-            data: dict = None,
-            timeout: timedelta = None,
-            headers: dict = None,
-            **kwargs
+        self,
+        method: HttpMethod,
+        url: str,
+        params: dict = None,
+        data: dict = None,
+        timeout: timedelta = None,
+        headers: dict = None,
+        **kwargs
     ):
         """内部请求实现方法
 
@@ -156,7 +158,7 @@ class AsyncHttpClient:
 
         return AsyncRequest(self, HttpMethod.GET, url, params=params, timeout=timeout, **kwargs)
 
-    async def post(self, url: str, data: dict = None, timeout: timedelta = None, **kwargs) -> AsyncRequest:
+    def post(self, url: str, data: dict = None, timeout: timedelta = None, **kwargs) -> AsyncRequest:
         """POST请求
 
         Args:
@@ -166,9 +168,9 @@ class AsyncHttpClient:
 
         Returns: AsyncRequest
         """
-        return AsyncRequest(self, HttpMethod.GET, url, data=data, timeout=timeout, **kwargs)
+        return AsyncRequest(self, HttpMethod.POST, url, data=data, timeout=timeout, **kwargs)
 
-    async def put(self, url: str, data: dict = None, timeout: timedelta = None, **kwargs):
+    def put(self, url: str, data: dict = None, timeout: timedelta = None, **kwargs):
         """PUT请求
 
         Args:
@@ -178,9 +180,9 @@ class AsyncHttpClient:
 
         Returns: AsyncRequest
         """
-        return AsyncRequest(self, HttpMethod.GET, url, data=data, timeout=timeout, **kwargs)
+        return AsyncRequest(self, HttpMethod.PUT, url, data=data, timeout=timeout, **kwargs)
 
-    async def delete(self, url: str, data: dict = None, timeout: timedelta = None, **kwargs):
+    def delete(self, url: str, data: dict = None, timeout: timedelta = None, **kwargs):
         """DELETE请求
 
         Args:
@@ -190,7 +192,38 @@ class AsyncHttpClient:
 
         Returns: AsyncRequest
         """
-        return AsyncRequest(self, HttpMethod.GET, url, data=data, timeout=timeout, **kwargs)
+        return AsyncRequest(self, HttpMethod.DELETE, url, data=data, timeout=timeout, **kwargs)
+
+    def upload_file(
+        self,
+        url: str,
+        file: Union[str, bytes, Path],
+        file_field: str = "file",
+        filename: str = None,
+        method=HttpMethod.POST,
+        timeout: timedelta = None,
+        content_type: str = None,
+        **kwargs
+    ) -> AsyncRequest:
+        """
+        上传文件
+        Args:
+            url: 请求URL
+            file: 文件路径 or 字节数据
+            file_field: 文件参数字段 默认"file"
+            filename: 文件名名称
+            method: 请求方法，默认POST
+            content_type: 内容类型
+            timeout: 请求超时时间,单位秒
+
+        Returns: AsyncRequest
+        """
+        form_data = aiohttp.FormData()
+        _filename, file_bytes, mime_type = FileUtil.get_file_info(file, filename=filename, only_bytes=False)
+        filename = filename or _filename
+        content_type = content_type or mime_type
+        form_data.add_field(name=file_field, value=file_bytes, filename=filename, content_type=content_type)
+        return AsyncRequest(self, method, url, data=form_data, timeout=timeout, **kwargs)
 
 
 class HttpClient:
@@ -218,10 +251,7 @@ class HttpClient:
         self.response: requests.Response = None
 
     def _request(
-            self,
-            method: HttpMethod, url: str,
-            params: dict = None, data: dict = None,
-            timeout: timedelta = None, **kwargs
+        self, method: HttpMethod, url: str, params: dict = None, data: dict = None, timeout: timedelta = None, **kwargs
     ):
         """内部请求实现方法
 
@@ -241,13 +271,7 @@ class HttpClient:
         timeout = timeout or self.default_timeout
         headers = self.default_headers or {}
         self.response = self.client.request(
-            method=method.value,
-            url=url,
-            params=params,
-            data=data,
-            headers=headers,
-            timeout=timeout.total_seconds(),
-            **kwargs
+            method=method.value, url=url, params=params, data=data, headers=headers, timeout=timeout.total_seconds(), **kwargs
         )
         return self.response
 

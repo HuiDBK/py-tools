@@ -13,3 +13,5 @@ sqlalchemy[asyncio]==2.0.20
 aiomysql==0.2.0
 minio==7.1.17
 asgiref==3.8.1
+nest_asyncio==1.6.0
+tqdm==4.66.4

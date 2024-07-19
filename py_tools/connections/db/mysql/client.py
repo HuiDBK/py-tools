@@ -112,6 +112,7 @@ class SQLAlchemyManager(metaclass=SingletonMetaCls):
 class DBManager(metaclass=SingletonMetaCls):
     DB_CLIENT: SQLAlchemyManager = None
     orm_table: Type[BaseOrmTable] = None
+    session: AsyncSession = None
 
     @classmethod
     def init_db_client(cls, db_client: SQLAlchemyManager):
