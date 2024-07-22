@@ -35,6 +35,7 @@ class PKGManager:
             "requests==2.31.0",
             "aiohttp==3.9.5",
             "cacheout==0.14.1",
+            "aiofiles==24.1.0",
         ]
         return requires
 

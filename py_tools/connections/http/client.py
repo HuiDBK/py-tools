@@ -219,7 +219,7 @@ class AsyncHttpClient:
         Returns: AsyncRequest
         """
         form_data = aiohttp.FormData()
-        _filename, file_bytes, mime_type = FileUtil.get_file_info(file, filename=filename, only_bytes=False)
+        _filename, file_bytes, mime_type = FileUtil.get_file_info(file, filename=filename)
         filename = filename or _filename
         content_type = content_type or mime_type
         form_data.add_field(name=file_field, value=file_bytes, filename=filename, content_type=content_type)
