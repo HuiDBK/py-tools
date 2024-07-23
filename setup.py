@@ -11,7 +11,7 @@ from setuptools import find_packages, setup
 
 class PKGManager:
     name = "hui-tools"
-    version = "0.4.3"
+    version = "0.4.4"
     author = "hui"
     author_email = "huidbk@163.com"
 
@@ -74,7 +74,7 @@ def main():
             "Operating System :: OS Independent",
         ],
         extras_require=PKGManager.get_extras_require(),
-        python_requires=">=3.7",
+        python_requires=">=3.8",
         entry_points={"console_scripts": ["py_tools = py_tools.utils.project_templates:make_project"]},
         include_package_data=True,
     )

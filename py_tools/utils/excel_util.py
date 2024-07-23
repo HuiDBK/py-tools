@@ -40,7 +40,12 @@ class ExcelUtil(object):
 
     @classmethod
     def _to_excel(
-        cls, data_list: List[dict], col_mappings: List[ColumnMapping], sheet_name: str, writer: pandas.ExcelWriter, **kwargs
+        cls,
+        data_list: List[dict],
+        col_mappings: List[ColumnMapping],
+        sheet_name: str,
+        writer: pandas.ExcelWriter,
+        **kwargs,
     ):
         """
         将列表数据写入excel文件
@@ -64,7 +69,7 @@ class ExcelUtil(object):
         data_list: List[dict],
         col_mappings: List[ColumnMapping] = None,
         sheet_name: str = None,
-        **kwargs
+        **kwargs,
     ):
         """
         列表转 excel文件
@@ -119,7 +124,7 @@ class ExcelUtil(object):
         all_col: bool = True,
         header: int = 0,
         nan_replace=None,
-        **kwargs
+        **kwargs,
     ) -> List[dict]:
         """
         读取excel表格数据，根据col_mapping替换列名
@@ -148,7 +153,9 @@ class ExcelUtil(object):
         return df.to_dict("records")
 
     @classmethod
-    def merge_excel_files(cls, input_files: List[str], output_file: str, sheet_mappings: List[SheetMapping] = None, **kwargs):
+    def merge_excel_files(
+        cls, input_files: List[str], output_file: str, sheet_mappings: List[SheetMapping] = None, **kwargs
+    ):
         """
         合并多个Excel文件到一个文件中（每个文件对应一个工作表）
         如果Excel文件有多个作表，则默认取第一个工作表
@@ -160,7 +167,9 @@ class ExcelUtil(object):
         Returns:
         """
         sheet_mappings = sheet_mappings or []
-        sheet_dict = {sheet_mapping.file_name: sheet_mapping.sheet_name for sheet_mapping in sheet_mappings}
+        sheet_dict = {
+            os.path.basename(sheet_mapping.file_name): sheet_mapping.sheet_name for sheet_mapping in sheet_mappings
+        }
         with pandas.ExcelWriter(output_file, engine_kwargs=kwargs) as writer:
             for file in input_files:
                 df = pandas.read_excel(file)

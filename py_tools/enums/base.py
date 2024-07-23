@@ -68,17 +68,20 @@ class BaseEnum(Enum):
         return cls.get_members(exclude_enums=exclude_enums, only_desc=True)
 
     @classmethod
-    def get_value_by_desc(cls, enum_desc):
+    def get_member_by_desc(cls, enum_desc, only_value: bool = False):
         members = cls.get_members()
-        member_dic = {member.desc: member.value for member in members}
-        return member_dic.get(enum_desc)
+        member_dict = {member.desc: member for member in members}
+        member = member_dict.get(enum_desc)
+        return member.value if only_value else member
 
 
 class StrEnum(str, BaseEnum):
     """字符串枚举"""
+
     pass
 
 
 class IntEnum(int, BaseEnum):
     """整型枚举"""
+
     pass

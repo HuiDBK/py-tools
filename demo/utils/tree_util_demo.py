@@ -7,7 +7,12 @@
 import copy
 from pprint import pprint
 
-from py_tools.utils.tree import list_to_tree_dfs, list_to_tree_bfs, tree_to_list_dfs, tree_to_list_bfs
+from py_tools.utils.tree_util import (
+    list_to_tree_bfs,
+    list_to_tree_dfs,
+    tree_to_list_bfs,
+    tree_to_list_dfs,
+)
 
 depart_list = [
     {"id": 1, "name": "a1", "pid": 0},
@@ -43,5 +48,5 @@ def main():
     pprint(depart_tree_list)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

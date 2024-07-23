@@ -14,7 +14,7 @@ def chunk_list(data_list: list, chunk_size: int) -> list:
 
     Returns: list
     """
-    return [data_list[i:i + chunk_size] for i in range(0, len(data_list), chunk_size)]
+    return [data_list[i : i + chunk_size] for i in range(0, len(data_list), chunk_size)]
 
 
 def add_param_if_true(params, key, value, is_check_none=True):

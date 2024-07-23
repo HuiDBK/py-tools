@@ -9,8 +9,8 @@ from datetime import datetime
 
 from dateutil.relativedelta import relativedelta
 
-from py_tools.meta_cls import SingletonMetaCls
 from py_tools.enums import TimeFormatEnum
+from py_tools.meta_cls import SingletonMetaCls
 
 
 class TimeUtil(metaclass=SingletonMetaCls):

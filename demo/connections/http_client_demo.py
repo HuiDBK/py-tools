@@ -9,7 +9,7 @@ import aiohttp
 
 from py_tools.connections.http import AsyncHttpClient, HttpClient
 from py_tools.logging import logger
-from py_tools.utils.aio import run_jobs
+from py_tools.utils.async_util import AsyncUtil
 
 
 async def async_http_client_demo():
@@ -18,14 +18,14 @@ async def async_http_client_demo():
 
     # 调用
     resp = await AsyncHttpClient().get(url).execute()
-    # json_data = await AsyncHttpClient().get(url).json()
+    json_data = await AsyncHttpClient().get(url).json()
     text_data = await AsyncHttpClient(new_session=True).get(url).text()
     byte_data = await AsyncHttpClient().get(url).bytes()
 
     logger.debug(f"resp {resp}")
-    # logger.debug(f"json_data {json_data}")
-    # logger.debug(f"text_data {text_data}")
-    # logger.debug(f"byte_data {byte_data}")
+    logger.debug(f"json_data {json_data}")
+    logger.debug(f"text_data {text_data}")
+    logger.debug(f"byte_data {byte_data}")
 
     # 上传文件
     form = aiohttp.FormData()
@@ -63,7 +63,7 @@ def sync_http_client_demo():
 async def main():
     jobs = [async_http_client_demo(), async_http_client_demo()]
     # await asyncio.gather(*jobs)
-    await run_jobs(jobs, show_progress=True)
+    await AsyncUtil.run_jobs(jobs, show_progress=True)
     # await async_http_client_demo()
 
     # sync_http_client_demo()

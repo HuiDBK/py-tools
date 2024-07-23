@@ -5,7 +5,7 @@
 > 设计细节请移步到掘金查看：https://juejin.cn/column/7131286129713610766
 
 ## 安装
-- 环境要求：python version >= 3.7
+- 环境要求：python version >= 3.8
 - 历史版本记录：https://pypi.org/project/hui-tools/#history
 
 

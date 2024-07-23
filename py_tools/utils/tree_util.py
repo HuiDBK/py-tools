@@ -8,13 +8,13 @@ from typing import List
 
 
 def list_to_tree_dfs(
-        data_list: List[dict],
-        root_pid: int = 0,
-        pid_field: str = "pid",
-        sub_field: str = "children",
-        relate_field: str = "id",
-        level: int = 0,
-        need_level: bool = False,
+    data_list: List[dict],
+    root_pid: int = 0,
+    pid_field: str = "pid",
+    sub_field: str = "children",
+    relate_field: str = "id",
+    level: int = 0,
+    need_level: bool = False,
 ):
     """
     递归构造树形列表(深度优先)
@@ -45,13 +45,13 @@ def list_to_tree_dfs(
 
 
 def list_to_tree_bfs(
-        data_list: List[dict],
-        root_pid: int = 0,
-        pid_field: str = "pid",
-        sub_field: str = "children",
-        relate_field: str = "id",
-        level: int = 0,
-        need_level: bool = False,
+    data_list: List[dict],
+    root_pid: int = 0,
+    pid_field: str = "pid",
+    sub_field: str = "children",
+    relate_field: str = "id",
+    level: int = 0,
+    need_level: bool = False,
 ):
     """
     构造树形列表(广度优先)

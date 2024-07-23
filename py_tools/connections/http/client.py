@@ -12,7 +12,7 @@ import requests
 from aiohttp import ClientResponse
 
 from py_tools.enums import HttpMethod
-from py_tools.utils.file import FileUtil
+from py_tools.utils.file_util import FileUtil
 
 
 class AsyncRequest:
@@ -34,7 +34,7 @@ class AsyncRequest:
             data=self.data,
             timeout=self.timeout,
             headers=self.headers,
-            **self.kwargs
+            **self.kwargs,
         )
 
     async def json(self):
@@ -66,6 +66,7 @@ class AsyncHttpClient:
         >>> text_data = await AsyncHttpClient().get(url, params={"test": "hui"}).text()
         >>> json_data = await AsyncHttpClient().post(url, data={"test": "hui"}).json()
         >>> byte_data = await AsyncHttpClient().get(url).bytes()
+        >>> upload_file_ret = await AsyncHttpClient().upload_file(url, file="test.txt").json()
         >>>
         >>> async for chunk in AsyncHttpClient().get(url).stream(chunk_size=512):
         >>>     # 流式调用
@@ -90,7 +91,9 @@ class AsyncHttpClient:
 
     async def _get_client_session(self):
         if self.new_session:
-            client_session = aiohttp.ClientSession(headers=self.default_headers, timeout=self.default_timeout, **self.kwargs)
+            client_session = aiohttp.ClientSession(
+                headers=self.default_headers, timeout=self.default_timeout, **self.kwargs
+            )
             self.client_session_set.add(client_session)
             return client_session
 
@@ -116,7 +119,7 @@ class AsyncHttpClient:
         data: dict = None,
         timeout: timedelta = None,
         headers: dict = None,
-        **kwargs
+        **kwargs,
     ):
         """内部请求实现方法
 
@@ -203,7 +206,7 @@ class AsyncHttpClient:
         method=HttpMethod.POST,
         timeout: timedelta = None,
         content_type: str = None,
-        **kwargs
+        **kwargs,
     ) -> AsyncRequest:
         """
         上传文件
@@ -271,7 +274,13 @@ class HttpClient:
         timeout = timeout or self.default_timeout
         headers = self.default_headers or {}
         self.response = self.client.request(
-            method=method.value, url=url, params=params, data=data, headers=headers, timeout=timeout.total_seconds(), **kwargs
+            method=method.value,
+            url=url,
+            params=params,
+            data=data,
+            headers=headers,
+            timeout=timeout.total_seconds(),
+            **kwargs,
         )
         return self.response
 

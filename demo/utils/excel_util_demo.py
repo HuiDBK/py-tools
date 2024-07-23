@@ -5,9 +5,10 @@
 # @Date: 2023/04/17 0:31
 from io import BytesIO
 
+from py_tools.constants import DEMO_DATA
 from py_tools.logging import logger
 from py_tools.utils import ExcelUtil
-from py_tools.utils.excel import ColumnMapping, DataCollect, SheetMapping
+from py_tools.utils.excel_util import ColumnMapping, DataCollect, SheetMapping
 
 
 def list_to_excel_demo():
@@ -22,7 +23,8 @@ def list_to_excel_demo():
         ColumnMapping(column_name="age", column_alias="年龄"),
     ]
 
-    ExcelUtil.list_to_excel("tmp/user.xlsx", user_list, col_mappings=user_col_mappings)
+    file_path = DEMO_DATA / "user.xlsx"
+    ExcelUtil.list_to_excel(file_path, user_list, col_mappings=user_col_mappings)
 
     # 导出为excel文件字节流处理
     excel_bio = BytesIO()
@@ -31,7 +33,7 @@ def list_to_excel_demo():
     logger.debug(f"excel_bytes type => {type(excel_bytes)}")
 
     # 这里以重新写到文件里为例，字节流再业务中按需操作即可
-    with open("tmp/user_byte.xlsx", mode="wb") as f:
+    with open(f"{DEMO_DATA}/user_byte.xlsx", mode="wb") as f:
         f.write(excel_bytes)
 
 
@@ -65,7 +67,7 @@ def multi_list_to_excel_demo():
         DataCollect(data_list=book_list, col_mappings=book_col_mappings, sheet_name="图书信息"),
     ]
 
-    ExcelUtil.multi_list_to_excel("tmp/multi_sheet_data.xlsx", data_collects)
+    ExcelUtil.multi_list_to_excel(f"{DEMO_DATA}/multi_sheet_data.xlsx", data_collects)
 
 
 def read_excel_demo():
@@ -87,10 +89,11 @@ def read_excel_demo():
     ]
 
     # 将数据写入Excel文件
-    ExcelUtil.list_to_excel("tmp/read_demo.xlsx", data, col_mappings=user_col_mappings)
+    file_path = DEMO_DATA / "read_demo.xlsx"
+    ExcelUtil.list_to_excel(file_path, data, col_mappings=user_col_mappings)
 
     # 读取Excel文件
-    result = ExcelUtil.read_excel("tmp/read_demo.xlsx", col_mappings=user_id_and_name_mappings, all_col=False)
+    result = ExcelUtil.read_excel(file_path, col_mappings=user_id_and_name_mappings, all_col=False)
 
     logger.debug(f"read_excel {result}")
 
@@ -98,8 +101,8 @@ def read_excel_demo():
 def merge_excel_files_demo():
     # 合并多个Excel文件
     ExcelUtil.merge_excel_files(
-        input_files=["tmp/user.xlsx", "tmp/multi_sheet_data.xlsx"],
-        output_file="tmp/merged_data.xlsx",
+        input_files=[f"{DEMO_DATA}/user.xlsx", f"{DEMO_DATA}/multi_sheet_data.xlsx"],
+        output_file=f"{DEMO_DATA}/merged_data.xlsx",
         sheet_mappings=[
             SheetMapping(file_name="user.xlsx", sheet_name="user"),
             SheetMapping(file_name="multi_sheet_data.xlsx", sheet_name="multi_sheet_data"),
