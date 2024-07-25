@@ -9,7 +9,7 @@ from datetime import datetime
 
 from dateutil.relativedelta import relativedelta
 
-from py_tools.enums import TimeFormatEnum
+from py_tools.enums.time import TimeFormatEnum
 from py_tools.meta_cls import SingletonMetaCls
 
 

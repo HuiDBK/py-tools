@@ -74,7 +74,7 @@ def read_excel_demo():
     data = [
         {"id": 1, "name": "hui", "age": 30},
         {"id": 2, "name": "zack", "age": 25},
-        {"id": 3, "name": "wang", "age": 40},
+        {"id": 3, "name": "", "age": 40},
     ]
 
     user_col_mappings = [
@@ -93,7 +93,7 @@ def read_excel_demo():
     ExcelUtil.list_to_excel(file_path, data, col_mappings=user_col_mappings)
 
     # 读取Excel文件
-    result = ExcelUtil.read_excel(file_path, col_mappings=user_id_and_name_mappings, all_col=False)
+    result = ExcelUtil.read_excel(file_path, col_mappings=user_id_and_name_mappings, all_col=False, nan_replace="")
 
     logger.debug(f"read_excel {result}")
 

@@ -6,7 +6,6 @@
 import os
 from typing import IO, List, Union
 
-import numpy as np
 import pandas
 from pydantic import BaseModel, Field
 
@@ -29,7 +28,7 @@ class DataCollect(BaseModel):
     """多sheet的数据集合"""
 
     data_list: List[dict] = Field(description="数据列表")
-    col_mappings: List[ColumnMapping] = Field(description="列名映射列表")
+    col_mappings: List[ColumnMapping] = Field(default=[], description="列名映射列表")
     sheet_name: str = Field(description="sheet名称")
 
 
@@ -134,7 +133,7 @@ class ExcelUtil(object):
             col_mappings: 列字段映射
             all_col: True返回所有列信息，False则返回col_mapping对应的字段信息
             header: 默认0从第一行开启读取，用于指定从第几行开始读取
-            nan_replace: nan值替换，默认替换成None
+            nan_replace: nan值替换
 
         Returns:
         """
@@ -146,7 +145,9 @@ class ExcelUtil(object):
             use_cols = list(col_dict) if col_dict else None
 
         df = pandas.read_excel(path_or_buffer, sheet_name=sheet_name, usecols=use_cols, header=header, **kwargs)
-        df.replace(np.NAN, nan_replace)
+        if nan_replace is not None:
+            df.fillna(nan_replace, inplace=True)
+
         if col_dict:
             df.rename(columns=col_dict, inplace=True)
 
