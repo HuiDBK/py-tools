@@ -7,5 +7,6 @@ from py_tools.utils.excel_util import ExcelUtil
 from py_tools.utils.time_util import TimeUtil
 from py_tools.utils.file_util import FileUtil
 from py_tools.utils.async_util import AsyncUtil
+from py_tools.utils.mask_util import MaskUtil
 
-__all__ = ["ExcelUtil", "TimeUtil", "FileUtil", "AsyncUtil"]
+__all__ = ["ExcelUtil", "TimeUtil", "FileUtil", "AsyncUtil", "MaskUtil"]

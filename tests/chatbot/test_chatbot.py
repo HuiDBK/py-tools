@@ -12,10 +12,11 @@ from py_tools.chatbot import (
     ChatBotFactory,
     ChatBotType,
     DingTalkChatBot,
+    FeiShuAppServer,
     FeiShuChatBot,
+    FeiShuTaskChatBot,
     WeComChatbot,
 )
-from py_tools.chatbot.app_server import FeiShuAppServer, FeiShuTaskChatBot
 from py_tools.enums.feishu import FeishuReceiveType
 from py_tools.exceptions import SendMsgException
 
