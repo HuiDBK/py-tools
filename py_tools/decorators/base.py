@@ -3,22 +3,24 @@
 # @Author: Hui
 # @Desc: { 通用装饰器模块 }
 # @Date: 2022/11/26 16:16
-import signal
-import time
 import asyncio
-import threading
 import functools
+import signal
+import threading
+import time
 import traceback
-from concurrent.futures import ThreadPoolExecutor, TimeoutError, Executor
-from typing import Type, Callable
+from asyncio import iscoroutinefunction
+from concurrent.futures import Executor, ThreadPoolExecutor, TimeoutError
+from datetime import datetime
+from typing import Callable, Type
 
 from loguru import logger
 
-from py_tools.exceptions import MaxTimeoutException, MaxRetryException
+from py_tools.exceptions import MaxRetryException, MaxTimeoutException
 
 
 def synchronized(func):
-    """ 同步锁装饰器 """
+    """同步锁装饰器"""
     func.__lock__ = threading.Lock()
 
     @functools.wraps(func)
@@ -30,7 +32,7 @@ def synchronized(func):
 
 
 def singleton(cls_obj):
-    """ 单例装饰器 """
+    """单例装饰器"""
     _instance_dic = {}
     _instance_lock = threading.Lock()
 
@@ -47,18 +49,42 @@ def singleton(cls_obj):
     return wrapper
 
 
-def calc_time(func):
-    """ 执行时间计算装饰器 """
+def timing(method):
+    """
+    例子:
 
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        start_ts = time.time()
-        ret = func(*args, **kwargs)
-        use_time = time.time() - start_ts
-        logger.info(f"func {func.__name__} use {use_time}s")
-        return ret
+        @timing
+        def my_func():
+            pass
+    """
 
-    return wrapper
+    def before_call():
+        start_time, cpu_start_time = time.perf_counter(), time.process_time()
+        logger.info(f"[{method.__name__}] started at: " f"{datetime.now().strftime('%Y-%m-%d %H:%m:%S')}")
+        return start_time, cpu_start_time
+
+    def after_call(start_time, cpu_start_time):
+        end_time, cpu_end_time = time.perf_counter(), time.process_time()
+        logger.info(
+            f"[{method.__name__}] ended. "
+            f"Time elapsed: {end_time - start_time:.4} sec, CPU elapsed: {cpu_end_time - cpu_start_time:.4} sec"
+        )
+
+    @functools.wraps(method)
+    def timeit_wrapper(*args, **kwargs):
+        start_time, cpu_start_time = before_call()
+        result = method(*args, **kwargs)
+        after_call(start_time, cpu_start_time)
+        return result
+
+    @functools.wraps(method)
+    async def timeit_wrapper_async(*args, **kwargs):
+        start_time, cpu_start_time = before_call()
+        result = await method(*args, **kwargs)
+        after_call(start_time, cpu_start_time)
+        return result
+
+    return timeit_wrapper_async if iscoroutinefunction(method) else timeit_wrapper
 
 
 def set_timeout(timeout: int, use_signal=False):
@@ -74,7 +100,6 @@ def set_timeout(timeout: int, use_signal=False):
     """
 
     def _timeout(func: Callable):
-
         def _handle_timeout(signum, frame):
             raise MaxTimeoutException(f"Function timed out after {timeout} seconds")
 
@@ -112,11 +137,7 @@ def set_timeout(timeout: int, use_signal=False):
     return _timeout
 
 
-def retry(
-        max_count: int = 5,
-        interval: int = 2,
-        catch_exc: Type[BaseException] = Exception
-):
+def retry(max_count: int = 5, interval: int = 2, catch_exc: Type[BaseException] = Exception):
     """
     重试装饰器
     Args:
@@ -129,7 +150,6 @@ def retry(
     """
 
     def _retry(task_func):
-
         @functools.wraps(task_func)
         def sync_wrapper(*args, **kwargs):
             # 函数循环重试
@@ -194,7 +214,7 @@ def run_on_executor(executor: Executor = None, background: bool = False):
         @functools.wraps(func)
         def sync_wrapper(*args, **kwargs):
             loop = asyncio.get_event_loop()
-            task_func = functools.partial(func, *args, **kwargs)    # 支持关键字参数
+            task_func = functools.partial(func, *args, **kwargs)  # 支持关键字参数
             return loop.run_in_executor(executor, task_func)
 
         # 异步函数判断

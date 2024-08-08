@@ -3,9 +3,9 @@
 # @Author: Hui
 # @Desc: { webhook机器人模块 }
 # @Date: 2023/02/19 19:48
-import hmac
 import base64
 import hashlib
+import hmac
 import time
 from urllib.parse import quote_plus
 
@@ -63,11 +63,11 @@ class FeiShuChatBot(BaseChatBot):
 
         Returns: sign
         """
-        string_to_sign = '{}\n{}'.format(timestamp, secret)
+        string_to_sign = "{}\n{}".format(timestamp, secret)
         hmac_code = hmac.new(string_to_sign.encode("utf-8"), digestmod=hashlib.sha256).digest()
 
         # 对结果进行base64处理
-        sign = base64.b64encode(hmac_code).decode('utf-8')
+        sign = base64.b64encode(hmac_code).decode("utf-8")
         return sign
 
     def send_msg(self, content: str, timeout=10):
@@ -82,12 +82,7 @@ class FeiShuChatBot(BaseChatBot):
 
         Returns:
         """
-        msg_data = {
-            "msg_type": "text",
-            "content": {
-                "text": f"{content}"
-            }
-        }
+        msg_data = {"msg_type": "text", "content": {"text": f"{content}"}}
         if self.secret:
             timestamp = str(round(time.time()))
             sign = self._get_sign(timestamp=timestamp, secret=self.secret)
@@ -99,6 +94,7 @@ class FeiShuChatBot(BaseChatBot):
             resp_info = resp.json()
             if resp_info.get("code") != 0:
                 raise SendMsgException(f"FeiShuRobot send msg error, {resp_info}")
+            return resp_info
         except Exception as e:
             raise SendMsgException(f"FeiShuRobot send msg error {e}") from e
 
@@ -117,9 +113,9 @@ class DingTalkChatBot(BaseChatBot):
 
         Returns: sign
         """
-        secret_enc = secret.encode('utf-8')
-        string_to_sign = '{}\n{}'.format(timestamp, secret)
-        string_to_sign_enc = string_to_sign.encode('utf-8')
+        secret_enc = secret.encode("utf-8")
+        string_to_sign = "{}\n{}".format(timestamp, secret)
+        string_to_sign_enc = string_to_sign.encode("utf-8")
         hmac_code = hmac.new(secret_enc, string_to_sign_enc, digestmod=hashlib.sha256).digest()
         sign = quote_plus(base64.b64encode(hmac_code))
 
@@ -140,21 +136,14 @@ class DingTalkChatBot(BaseChatBot):
         timestamp = str(round(time.time() * 1000))
         sign = self._get_sign(timestamp=timestamp, secret=self.secret)
 
-        params = {
-            "timestamp": timestamp,
-            "sign": sign
-        }
-        msg_data = {
-            "msgtype": "text",
-            "text": {
-                "content": content
-            }
-        }
+        params = {"timestamp": timestamp, "sign": sign}
+        msg_data = {"msgtype": "text", "text": {"content": content}}
         try:
             resp = requests.post(url=self.webhook_url, json=msg_data, params=params, timeout=timeout)
             resp_info = resp.json()
             if resp_info.get("errcode") != 0:
                 raise SendMsgException(f"DingTalkRobot send msg error, {resp_info}")
+            return resp_info
         except Exception as e:
             raise SendMsgException(f"DingTalkRobot send msg error {e}") from e
 
@@ -166,12 +155,8 @@ class WeComChatbot(BaseChatBot):
         pass
 
     def send_msg(self, content: str, timeout=10):
-        msg_data = {
-            "msgtype": "text",
-            "text": {
-                "content": content
-            }
-        }
+        msg_data = {"msgtype": "text", "text": {"content": content}}
         resp = requests.post(self.webhook_url, json=msg_data)
         if resp.status_code != 200:
-            raise ValueError("Failed to send message")
+            raise SendMsgException("Failed to send message")
+        return resp

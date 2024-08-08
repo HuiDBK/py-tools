@@ -11,7 +11,7 @@ import aiohttp
 import requests
 from aiohttp import ClientResponse
 
-from py_tools.enums import HttpMethod
+from py_tools.enums.http import HttpMethod
 from py_tools.utils.file_util import FileUtil
 
 

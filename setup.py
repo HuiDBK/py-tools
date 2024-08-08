@@ -11,7 +11,7 @@ from setuptools import find_packages, setup
 
 class PKGManager:
     name = "hui-tools"
-    version = "0.4.5"
+    version = "0.4.6"
     author = "hui"
     author_email = "huidbk@163.com"
 
@@ -49,7 +49,8 @@ class PKGManager:
             "db-redis": ["redis>=4.5.4"],
             "cache-proxy": ["redis>=4.5.4", "python-memcached==1.62", "cacheout==0.14.1"],
             "minio": ["minio==7.1.17"],
-            "excel-tools": ["pandas==1.3.5", "openpyxl==3.0.10"],
+            "excel-tools": ["pandas==2.2.2", "openpyxl==3.0.10"],
+            "test": ["pytest==7.3.1", "pytest-mock==3.14.0", "pytest-asyncio==0.23.8"],
         }
 
         extras_require["all"] = list(set(reduce(operator.add, [cls.get_install_requires(), *extras_require.values()])))
