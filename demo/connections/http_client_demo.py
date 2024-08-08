@@ -1,13 +1,14 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # @Author: Hui
-# @Desc: { 模块描述 }
+# @Desc: { http客户端案例 }
 # @Date: 2023/08/10 11:39
 import asyncio
 
 import aiohttp
 
 from py_tools.connections.http import AsyncHttpClient, HttpClient
+from py_tools.constants.const import BASE_DIR
 from py_tools.logging import logger
 from py_tools.utils.async_util import AsyncUtil
 
@@ -18,18 +19,18 @@ async def async_http_client_demo():
 
     # 调用
     resp = await AsyncHttpClient().get(url).execute()
-    json_data = await AsyncHttpClient().get(url).json()
+    # json_data = await AsyncHttpClient().get(url).json()
     text_data = await AsyncHttpClient(new_session=True).get(url).text()
     byte_data = await AsyncHttpClient().get(url).bytes()
 
     logger.debug(f"resp {resp}")
-    logger.debug(f"json_data {json_data}")
+    # logger.debug(f"json_data {json_data}")
     logger.debug(f"text_data {text_data}")
     logger.debug(f"byte_data {byte_data}")
 
     # 上传文件
     form = aiohttp.FormData()
-    file_path = "../../README.md"
+    file_path = BASE_DIR / "README.md"
     form.add_field("file", open(file_path, "rb"), filename="new_name.md", content_type="application/octet-stream")
     url = "http://localhost:8000/file_upload/file_params"
     upload_ret = await AsyncHttpClient().post(url=url, data=form).json()

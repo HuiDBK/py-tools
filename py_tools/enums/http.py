@@ -3,8 +3,8 @@
 # @Author: Hui
 # @Desc: { http相关枚举 }
 # @Date: 2023/08/10 09:37
-from py_tools.enums import BaseEnum
-from http import HTTPStatus
+
+from py_tools.enums.base import BaseEnum
 
 
 class HttpMethod(BaseEnum):

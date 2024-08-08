@@ -325,7 +325,7 @@ class HttpClient:
         self._request(HttpMethod.POST, url, data=data, timeout=timeout, **kwargs)
         return self
 
-    async def put(self, url: str, data: dict = None, timeout: timedelta = None, **kwargs):
+    def put(self, url: str, data: dict = None, timeout: timedelta = None, **kwargs):
         """PUT请求
 
         Args:
@@ -339,7 +339,7 @@ class HttpClient:
         self._request(HttpMethod.PUT, url, data=data, timeout=timeout, **kwargs)
         return self
 
-    async def delete(self, url: str, data: dict = None, timeout: timedelta = None, **kwargs):
+    def delete(self, url: str, data: dict = None, timeout: timedelta = None, **kwargs):
         """DELETE请求
 
         Args:
