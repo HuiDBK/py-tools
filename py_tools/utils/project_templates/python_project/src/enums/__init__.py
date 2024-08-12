@@ -1,1 +1,1 @@
-from .base import BizErrCodeEnum
+from src.enums.base import BizErrCodeEnum

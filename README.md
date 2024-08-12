@@ -35,11 +35,12 @@ pip install hui-tools[db-orm, db-redis, excel-tools]
 可选参数参考：
 ```python
 extras_require = {
-    "db-orm": ["sqlalchemy[asyncio]==2.0.20", "aiomysql==0.2.0"], # 数据库orm
-    "db-redis": ["redis>=4.5.4"], # redis
-    "cache-proxy": ["redis>=4.5.4", "python-memcached==1.62", "cacheout==0.14.1"], # 缓存代理
+    "db-orm": ["sqlalchemy[asyncio]==2.0.20", "aiomysql==0.2.0"],
+    "db-redis": ["redis>=4.5.4"],
+    "cache-proxy": ["redis>=4.5.4", "python-memcached==1.62", "cacheout==0.14.1"],
     "minio": ["minio==7.1.17"],
-    "excel-tools": ["pandas==1.3.5", "openpyxl==3.0.10"], # excel工具类
+    "excel-tools": ["pandas==2.2.2", "openpyxl==3.0.10"],
+    "test": ["pytest==7.3.1", "pytest-mock==3.14.0", "pytest-asyncio==0.23.8"],
 }
 ```
 
@@ -47,9 +48,25 @@ extras_require = {
 > 所有功能都是从 py_tools 包中导入使用
 > 详细使用请查看项目的DEMO： https://github.com/HuiDBK/py-tools/tree/master/demo
 
-生成python项目结构模板
+生成python web项目结构模板
 ```python
 py_tools make_project WebDemo
+```
+
+快速配置项目日志
+```python
+from py_tools.constants import BASE_DIR
+from py_tools.logging import logger, setup_logging
+
+
+def main():
+    setup_logging(log_dir=BASE_DIR / "logs")
+    logger.info("use log dir")
+    logger.error("test error")
+
+
+if __name__ == '__main__':
+    main()
 ```
 
 mysql数据库操作demo
