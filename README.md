@@ -69,6 +69,23 @@ if __name__ == '__main__':
     main()
 ```
 
+异步http客户端
+```python
+from py_tools.connections.http import AsyncHttpClient
+
+
+url = "https://juejin.cn/"
+resp = await AsyncHttpClient().get(url).execute()
+text_data = await AsyncHttpClient().get(url, params={"test": "hui"}).text()
+json_data = await AsyncHttpClient().post(url, data={"test": "hui"}).json()
+byte_data = await AsyncHttpClient().get(url).bytes()
+upload_file_ret = await AsyncHttpClient().upload_file(url, file="test.txt").json()
+
+async for chunk in AsyncHttpClient().get(url).stream(chunk_size=512):
+    # 流式调用
+    print(chunk)
+```
+
 mysql数据库操作demo
 ```python
 import asyncio
@@ -230,7 +247,7 @@ py-tools/
     │   ├── chatbot/
     │   ├── connections/
     │   ├── constants/
-    │   ├── data_models/
+    │   ├── data_schemas/
     │   ├── decorators/
     │   ├── enums/
     │   ├── exceptions/
@@ -252,7 +269,7 @@ py-tools/
 - **chatbot**: 用于构建和管理聊天机器人互动的工具集。
 - **connections**: 用于连接各种服务和 API 的连接管理工具。
 - **constants**: Python 项目中常用的常量。
-- **data_models**: 用于处理结构化数据的数据模型及相关工具。
+- **data_schemas**: 用于处理结构化数据的数据模型及相关工具。
 - **decorators**: 一系列有用的装饰器，用以增强函数和方法。
 - **enums**: 定义常用枚举类型，方便在项目中使用。
 - **exceptions**: 自定义异常类，用于项目中的错误处理。

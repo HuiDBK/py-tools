@@ -13,22 +13,7 @@ from py_tools.logging import logger
 from py_tools.utils.async_util import AsyncUtil
 
 
-async def async_http_client_demo():
-    logger.debug("async_http_client_demo")
-    url = "https://juejin.cn/"
-
-    # 调用
-    resp = await AsyncHttpClient().get(url).execute()
-    # json_data = await AsyncHttpClient().get(url).json()
-    text_data = await AsyncHttpClient(new_session=True).get(url).text()
-    byte_data = await AsyncHttpClient().get(url).bytes()
-
-    logger.debug(f"resp {resp}")
-    # logger.debug(f"json_data {json_data}")
-    logger.debug(f"text_data {text_data}")
-    logger.debug(f"byte_data {byte_data}")
-
-    # 上传文件
+async def upload_file_demo():
     form = aiohttp.FormData()
     file_path = BASE_DIR / "README.md"
     form.add_field("file", open(file_path, "rb"), filename="new_name.md", content_type="application/octet-stream")
@@ -47,9 +32,33 @@ async def async_http_client_demo():
     upload_ret = await AsyncHttpClient().upload_file(url=url, file=file_bytes, filename="hui_bytes.md").json()
     logger.debug(f"upload_ret {upload_ret}")
 
+
+async def async_http_client_demo():
+    logger.debug("async_http_client_demo")
+    url = "https://juejin.cn/"
+
+    # 调用
+    resp = await AsyncHttpClient().get(url).execute()
+    # json_data = await AsyncHttpClient().get(url).json()
+    text_data = await AsyncHttpClient(new_session=True).get(url).text()
+    byte_data = await AsyncHttpClient().get(url).bytes()
+
+    logger.debug(f"resp {resp}")
+    # logger.debug(f"json_data {json_data}")
+    logger.debug(f"text_data {text_data}")
+    logger.debug(f"byte_data {byte_data}")
+
+    # 上传文件
+    # await upload_file_demo()
+
     # 流式调用
     async for chunk in AsyncHttpClient().get(url).stream():
         print(chunk)
+
+    async with AsyncHttpClient() as client:
+        # 独立的 aiohttp.ClientSession，用完通过上下文管理器关闭
+        text = await client.get("https://juejin.cn/").text()
+        print(text)
 
 
 def sync_http_client_demo():
@@ -65,11 +74,9 @@ async def main():
     jobs = [async_http_client_demo(), async_http_client_demo()]
     # await asyncio.gather(*jobs)
     await AsyncUtil.run_jobs(jobs, show_progress=True)
-    # await async_http_client_demo()
-
-    # sync_http_client_demo()
-
     await AsyncHttpClient.close()
+
+    sync_http_client_demo()
 
 
 if __name__ == "__main__":

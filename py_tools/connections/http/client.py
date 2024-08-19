@@ -78,7 +78,7 @@ class AsyncHttpClient:
         new_session: 是否使用的新的客户端，默认共享一个 ClientSession
     """
 
-    # aiohttp 异步客户端
+    # aiohttp 异步客户端(全局共享)
     client_session: aiohttp.ClientSession = None
     client_session_set = set()
 
@@ -87,7 +87,24 @@ class AsyncHttpClient:
         self.default_timeout = aiohttp.ClientTimeout(timeout.total_seconds())
         self.default_headers = headers or {}
         self.new_session = new_session
+        self.cur_session: aiohttp.ClientSession = None
         self.kwargs = kwargs
+
+    async def __aenter__(self):
+        self.new_session = True
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        await self._close_cur_session()
+
+    async def _close_cur_session(self):
+        if self.cur_session:
+            await self.cur_session.close()
+            if self.cur_session == AsyncHttpClient.client_session:
+                AsyncHttpClient.client_session = None
+
+        if self.cur_session in self.client_session_set:
+            self.client_session_set.remove(self.cur_session)
 
     async def _get_client_session(self):
         if self.new_session:
@@ -110,6 +127,8 @@ class AsyncHttpClient:
     async def close(cls):
         for client_session in cls.client_session_set:
             await client_session.close()
+
+        cls.client_session_set.clear()
 
     async def _request(
         self,
@@ -144,6 +163,7 @@ class AsyncHttpClient:
         headers = headers or {}
         headers = self.default_headers.update(**headers)
         client_session = await self._get_client_session()
+        self.cur_session = client_session
         return await client_session.request(
             method.value, url, params=params, data=data, timeout=timeout, headers=headers, **kwargs
         )
