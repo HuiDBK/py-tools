@@ -5,7 +5,7 @@
 # @Date: 2023/08/10 09:33
 from datetime import timedelta
 from pathlib import Path
-from typing import Union
+from typing import Any, Union
 
 import aiohttp
 import requests
@@ -114,7 +114,7 @@ class AsyncHttpClient:
             self.client_session_set.add(client_session)
             return client_session
 
-        if self.client_session is not None:
+        if self.client_session is not None and not self.client_session.closed:
             return self.client_session
 
         AsyncHttpClient.client_session = aiohttp.ClientSession(
@@ -129,6 +129,7 @@ class AsyncHttpClient:
             await client_session.close()
 
         cls.client_session_set.clear()
+        cls.client_session = None
 
     async def _request(
         self,
@@ -181,7 +182,7 @@ class AsyncHttpClient:
 
         return AsyncRequest(self, HttpMethod.GET, url, params=params, timeout=timeout, **kwargs)
 
-    def post(self, url: str, data: dict = None, timeout: timedelta = None, **kwargs) -> AsyncRequest:
+    def post(self, url: str, data: Union[dict, Any] = None, timeout: timedelta = None, **kwargs) -> AsyncRequest:
         """POST请求
 
         Args:
@@ -193,7 +194,7 @@ class AsyncHttpClient:
         """
         return AsyncRequest(self, HttpMethod.POST, url, data=data, timeout=timeout, **kwargs)
 
-    def put(self, url: str, data: dict = None, timeout: timedelta = None, **kwargs):
+    def put(self, url: str, data: Union[dict, Any], timeout: timedelta = None, **kwargs):
         """PUT请求
 
         Args:
@@ -205,7 +206,7 @@ class AsyncHttpClient:
         """
         return AsyncRequest(self, HttpMethod.PUT, url, data=data, timeout=timeout, **kwargs)
 
-    def delete(self, url: str, data: dict = None, timeout: timedelta = None, **kwargs):
+    def delete(self, url: str, data: Union[dict, Any], timeout: timedelta = None, **kwargs):
         """DELETE请求
 
         Args:

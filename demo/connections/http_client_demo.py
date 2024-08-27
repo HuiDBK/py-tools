@@ -76,6 +76,9 @@ async def main():
     await AsyncUtil.run_jobs(jobs, show_progress=True)
     await AsyncHttpClient.close()
 
+    await AsyncHttpClient().get("https://juejin.cn/").bytes()
+    await AsyncHttpClient.close()
+
     sync_http_client_demo()
 
 

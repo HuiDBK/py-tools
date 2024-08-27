@@ -71,19 +71,29 @@ if __name__ == '__main__':
 
 异步http客户端
 ```python
+import asyncio
 from py_tools.connections.http import AsyncHttpClient
 
 
-url = "https://juejin.cn/"
-resp = await AsyncHttpClient().get(url).execute()
-text_data = await AsyncHttpClient().get(url, params={"test": "hui"}).text()
-json_data = await AsyncHttpClient().post(url, data={"test": "hui"}).json()
-byte_data = await AsyncHttpClient().get(url).bytes()
-upload_file_ret = await AsyncHttpClient().upload_file(url, file="test.txt").json()
+async def main():
+    url = "https://juejin.cn/"
+    resp = await AsyncHttpClient().get(url).execute()
+    text_data = await AsyncHttpClient().get(url, params={"test": "hui"}).text()
+    json_data = await AsyncHttpClient().post(url, data={"test": "hui"}).json()
+    byte_data = await AsyncHttpClient().get(url).bytes()
+    
+    async with AsyncHttpClient() as client:
+        upload_file_ret = await client.upload_file(url, file="test.txt").json()
+    
+    async for chunk in AsyncHttpClient().get(url).stream(chunk_size=512):
+        # 流式调用
+        print(chunk)
+    
+    await AsyncHttpClient.close()
 
-async for chunk in AsyncHttpClient().get(url).stream(chunk_size=512):
-    # 流式调用
-    print(chunk)
+
+if __name__ == "__main__":
+    asyncio.run(main())
 ```
 
 mysql数据库操作demo
@@ -214,10 +224,11 @@ if __name__ == "__main__":
 
 ### 连接客户端
 1. [x] http 同步异步客户端
-2. [x] MySQL客户端 - SQLAlchemy-ORM 封装 
-3. [x] Minio 客户端 
-4. 消息队列客户端，rabbitmq、kafka 
-5. websocket 客户端
+2. [x] MySQL 客户端 - SQLAlchemy-ORM 封装
+3. [x] Redis 客户端
+4. [x] Minio 客户端 
+5. 消息队列客户端，rabbitmq、kafka 
+6. websocket 客户端
 
 ### 工具类
 - 图片操作工具类，例如校验图片分辨率
@@ -226,6 +237,7 @@ if __name__ == "__main__":
 - 认证相关工具类，例如jwt、oauth2等
 - 邮件服务工具类
 - 常用正则工具类
+- 加密工具类
 
 ### 装饰器
 1. [x] 超时装饰器
@@ -234,10 +246,16 @@ if __name__ == "__main__":
 4. [x] 异步执行装饰器
 
 ### 枚举
+1. [x] 通用枚举类封装
+2. [x] 错误码枚举封装
+3. [x] 常用枚举
 
 ### 异常
+1. [x] 业务异常类封装
 
 ### 日志
+1. [x] logger 日志器（loguru）
+2. [x] 快速配置项目日志函数
 
 ## 工程目录结构
 
@@ -299,9 +317,9 @@ demo：https://github.com/HuiDBK/py-tools/tree/master/demo
 ## 一起贡献
 > 欢迎您对本项目进行贡献。请在提交 Pull Request 之前阅读项目的贡献指南，并确保您的代码符合项目的代码风格。
 
-1. 克隆本项目到本地：
+1. Fork后克隆本项目到本地：
 ```bash
-git clone https://github.com/HuiDBK/py-tools.git
+git clone https://github.com/<github_name>/py-tools.git
 ```
 
 2. 安装依赖:
