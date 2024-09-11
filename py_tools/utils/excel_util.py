@@ -6,7 +6,11 @@
 import os
 from typing import IO, List, Union
 
-import pandas
+try:
+    import pandas
+except:
+    pass
+
 from pydantic import BaseModel, Field
 
 
@@ -43,7 +47,7 @@ class ExcelUtil(object):
         data_list: List[dict],
         col_mappings: List[ColumnMapping],
         sheet_name: str,
-        writer: pandas.ExcelWriter,
+        writer: "pandas.ExcelWriter",
         **kwargs,
     ):
         """
