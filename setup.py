@@ -11,7 +11,7 @@ from setuptools import find_packages, setup
 
 class PKGManager:
     name = "hui-tools"
-    version = "0.5.2"
+    version = "0.5.3"
     author = "hui"
     author_email = "huidbk@163.com"
 
@@ -36,6 +36,7 @@ class PKGManager:
             "aiohttp==3.9.5",
             "cacheout==0.14.1",
             "aiofiles==24.1.0",
+            "python-jose==3.3.0",
         ]
         return requires
 

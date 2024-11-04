@@ -99,6 +99,28 @@ class FileUtil:
         return file_bytes
 
     @staticmethod
+    async def awrite(file_path: Union[str, Path], data: bytes) -> str:
+        """
+        异步写入文件。
+
+        Args:
+            file_path: 要读取的文件路径。
+            data: 要写入的字节数据。
+
+        Raises:
+            ValueError: 如果提供的路径不是字符串或Path对象。
+
+        Returns:
+            file_path: 文件路径。
+        """
+        if not isinstance(file_path, (str, Path)):
+            raise ValueError("file_path必须是字符串或Path对象")
+
+        async with aiofiles.open(file_path, "wb") as file:
+            await file.write(data)
+        return file_path
+
+    @staticmethod
     def read_bytes_chunked(file_path: Union[str, Path], chunk_size: int = 1024) -> Generator:
         """
         同步分块读取文件字节数据。

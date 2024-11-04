@@ -65,6 +65,7 @@ def setup_logging(
         add_param_if_true(log_conf, key, val)
 
     if log_dir:
+        log_dir = Path(log_dir)
         server_log_file = log_dir / "server.log"
         error_log_file = log_dir / "error.log"
         log_conf["sink"] = log_conf.get("sink") or server_log_file
@@ -73,7 +74,8 @@ def setup_logging(
         if not log_conf.get("sink"):
             raise ValueError("log_conf must have `sink` key")
 
-        sink_file: Path = log_conf.get("sink")
+        sink_file = log_conf.get("sink")
+        sink_file = Path(sink_file)
         error_log_file = sink_file.parent / "error.log"
         logging_conf["error_handler"]["sink"] = error_log_file
 
