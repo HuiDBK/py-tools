@@ -29,8 +29,15 @@ error_logging_retention = "30 days"
 
 # 项目日志配置
 console_log_level = logging.DEBUG
-trace_msg_log_format = "{time:YYYY-MM-DD HH:mm:ss.SSS} | {level} | {trace_msg} | {name}:{function}:{line} - {message}"
-default_log_format = "{time:YYYY-MM-DD HH:mm:ss.SSS} | {level} | {name}:{function}:{line} - {message}"
+trace_msg_log_format = (
+    "{time:YYYY-MM-DD HH:mm:ss.SSS} | {level:<8} | {trace_msg} | {name}:{function}:{line} - {message}"
+)
+default_log_format = "{time:YYYY-MM-DD HH:mm:ss.SSS} | {level:<8} | {name}:{function}:{line} - {message}"
+console_log_format = (
+    "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | "
+    "<level>{level:<8}</level> | "
+    "<level>{name}:{function}:{line} - {message}</level>"
+)
 
 default_logging_conf = {
     "console_handler": {

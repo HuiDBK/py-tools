@@ -11,7 +11,7 @@ from setuptools import find_packages, setup
 
 class PKGManager:
     name = "hui-tools"
-    version = "0.5.3"
+    version = "0.5.4"
     author = "hui"
     author_email = "huidbk@163.com"
 
