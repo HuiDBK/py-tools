@@ -22,7 +22,6 @@ from sqlalchemy.ext.asyncio import (
 
 from py_tools.connections.db.mysql import BaseOrmTable
 from py_tools.meta_cls import SingletonMetaCls
-from py_tools.utils import SerializerUtil
 
 T_BaseOrmTable = TypeVar("T_BaseOrmTable", bound=BaseOrmTable)
 T_Hints = TypeVar("T_Hints")  # 用于修复被装饰的函数参数提示，让IDE有类型提示
@@ -486,6 +485,10 @@ class DBManager(metaclass=SingletonMetaCls):
         cursor_result = await self._query(
             cols=cols, orm_table=orm_table, join_tables=join_tables, conds=conds, orders=orders, session=session
         )
+
+        # fix circular import
+        from py_tools.utils import SerializerUtil
+
         if cols:
             if flat and len(cols) == 1:
                 # 单行单字段查询: 直接返回字段结果
@@ -544,6 +547,10 @@ class DBManager(metaclass=SingletonMetaCls):
             offset=offset,
             session=session,
         )
+
+        # fix circular import
+        from py_tools.utils import SerializerUtil
+
         if cols:
             if flat and len(cols) == 1:
                 # 扁平化处理
