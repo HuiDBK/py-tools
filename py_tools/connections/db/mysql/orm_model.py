@@ -14,12 +14,16 @@ class BaseOrmTable(AsyncAttrs, DeclarativeBase):
 
     __abstract__ = True
 
-    id: Mapped[int] = mapped_column(primary_key=True, comment="主键ID")
+    id: Mapped[int] = mapped_column(primary_key=True, sort_order=-1, comment="主键ID")
 
     def __repr__(self):
-        return str(self.to_dict())
+        return f"<{self.__class__.__name__} {self.to_dict()}>"
 
-    def to_dict(self, alias_dict: dict = None, exclude_none=True) -> dict:
+    @classmethod
+    def all_columns(cls):
+        return [column for column in cls.__table__.columns]
+
+    def to_dict(self, alias_dict: dict = None, exclude_none=False) -> dict:
         """
         数据库模型转成字典
         Args:
@@ -32,11 +36,11 @@ class BaseOrmTable(AsyncAttrs, DeclarativeBase):
         if exclude_none:
             return {
                 alias_dict.get(c.name, c.name): getattr(self, c.name)
-                for c in self.__table__.columns
+                for c in self.all_columns()
                 if getattr(self, c.name) is not None
             }
         else:
-            return {alias_dict.get(c.name, c.name): getattr(self, c.name, None) for c in self.__table__.columns}
+            return {alias_dict.get(c.name, c.name): getattr(self, c.name) for c in self.all_columns()}
 
 
 class TimestampColumns(AsyncAttrs, DeclarativeBase):

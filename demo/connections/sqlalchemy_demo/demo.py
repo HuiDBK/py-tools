@@ -18,24 +18,24 @@ db_client = SQLAlchemyManager(
     port=3306,
     user="root",
     password="123456",
-    db_name="hui-demo",
+    db_name="db_demo",
 )
 
 
 async def create_and_transaction_demo():
     async with UserFileManager.transaction() as session:
-        await UserFileManager().bulk_add(table_objs=[{"filename": "aaa", "oss_key": uuid.uuid4().hex}], session=session)
+        await UserFileManager(session).bulk_add(table_objs=[{"filename": "aaa", "oss_key": uuid.uuid4().hex}])
         user_file_obj = UserFileTable(filename="eee", oss_key=uuid.uuid4().hex)
-        file_id = await UserFileManager().add(table_obj=user_file_obj, session=session)
+        file_id = await UserFileManager(session).add(table_obj=user_file_obj)
         print("file_id", file_id)
 
-        ret: UserFileTable = await UserFileManager().query_by_id(2, session=session)
+        ret: UserFileTable = await UserFileManager(session).query_by_id(2)
         print("query_by_id", ret)
 
         # a = 1 / 0
 
-        ret = await UserFileManager().query_one(
-            cols=[UserFileTable.filename, UserFileTable.oss_key], conds=[UserFileTable.filename == "ccc"], session=session
+        ret = await UserFileManager(session).query_one(
+            cols=[UserFileTable.filename, UserFileTable.oss_key], conds=[UserFileTable.filename == "ccc"]
         )
         print("ret", ret)
 
@@ -47,8 +47,13 @@ async def query_demo():
     file_count = await UserFileManager().query_one(cols=[func.count()], flat=True)
     print("str col one ret", file_count)
 
-    filename = await UserFileManager().query_one(cols=[UserFileTable.filename], conds=[UserFileTable.id == 2], flat=True)
+    filename = await UserFileManager().query_one(
+        cols=[UserFileTable.filename], conds=[UserFileTable.id == 2], flat=True
+    )
     print("filename", filename)
+
+    ret = await UserFileManager().query_one(conds=[UserFileTable.id == 3])
+    print(ret)
 
     ret = await UserFileManager().query_all(cols=[UserFileTable.filename, UserFileTable.oss_key])
     print("ret", ret)

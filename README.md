@@ -120,18 +120,18 @@ db_client = SQLAlchemyManager(
 
 async def create_and_transaction_demo():
     async with UserFileManager.transaction() as session:
-        await UserFileManager().bulk_add(table_objs=[{"filename": "aaa", "oss_key": uuid.uuid4().hex}], session=session)
+        await UserFileManager(session).bulk_add(table_objs=[{"filename": "aaa", "oss_key": uuid.uuid4().hex}])
         user_file_obj = UserFileTable(filename="eee", oss_key=uuid.uuid4().hex)
-        file_id = await UserFileManager().add(table_obj=user_file_obj, session=session)
+        file_id = await UserFileManager(session).add(table_obj=user_file_obj)
         print("file_id", file_id)
 
-        ret: UserFileTable = await UserFileManager().query_by_id(2, session=session)
+        ret: UserFileTable = await UserFileManager(session).query_by_id(2)
         print("query_by_id", ret)
 
         # a = 1 / 0
 
-        ret = await UserFileManager().query_one(
-            cols=[UserFileTable.filename, UserFileTable.oss_key], conds=[UserFileTable.filename == "ccc"], session=session
+        ret = await UserFileManager(session).query_one(
+            cols=[UserFileTable.filename, UserFileTable.oss_key], conds=[UserFileTable.filename == "ccc"],
         )
         print("ret", ret)
 
@@ -240,6 +240,7 @@ if __name__ == "__main__":
 - [x] 常用正则工具类
 - [x] 时间工具类
 - [x] 树结构转换工具类
+- [x] pydantic model 、dataclass 与 SQLALChemy table 序列化与反序列工具类
 - 认证相关工具类
   - [x] JWT 工具类
 - 图片操作工具类，例如校验图片分辨率

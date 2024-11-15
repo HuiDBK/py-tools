@@ -10,5 +10,6 @@ from py_tools.utils.async_util import AsyncUtil
 from py_tools.utils.mask_util import MaskUtil
 from py_tools.utils.re_util import RegexUtil
 from py_tools.utils.jwt_util import JWTUtil
+from py_tools.utils.serializer_util import SerializerUtil
 
-__all__ = ["ExcelUtil", "TimeUtil", "FileUtil", "AsyncUtil", "MaskUtil", "RegexUtil", "JWTUtil"]
+__all__ = ["ExcelUtil", "TimeUtil", "FileUtil", "AsyncUtil", "MaskUtil", "RegexUtil", "JWTUtil", "SerializerUtil"]

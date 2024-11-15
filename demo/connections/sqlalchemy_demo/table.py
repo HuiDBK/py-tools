@@ -15,12 +15,12 @@ class UserTable(BaseOrmTableWithTS):
     """用户表"""
 
     __tablename__ = "user"
-    username: Mapped[str] = mapped_column(default="", comment="用户昵称")
+    username: Mapped[str] = mapped_column(String(100), default="", comment="用户昵称")
     age: Mapped[int] = mapped_column(default=0, comment="年龄")
-    password: Mapped[str] = mapped_column(default="", comment="用户密码")
-    phone: Mapped[str] = mapped_column(default="", comment="手机号")
-    email: Mapped[str] = mapped_column(default="", comment="邮箱")
-    avatar: Mapped[str] = mapped_column(default="", comment="头像")
+    password: Mapped[str] = mapped_column(String(100), default="", comment="用户密码")
+    phone: Mapped[str] = mapped_column(String(100), default="", comment="手机号")
+    email: Mapped[str] = mapped_column(String(100), default="", comment="邮箱")
+    avatar: Mapped[str] = mapped_column(String(100), default="", comment="头像")
 
 
 class UserFileTable(BaseOrmTable):
