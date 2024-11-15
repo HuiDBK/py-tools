@@ -55,7 +55,12 @@ async def query_demo():
     ret = await UserFileManager().query_one(conds=[UserFileTable.id == 3])
     print(ret)
 
+    ret = await UserFileManager().query_one(cols=["filename", "oss_key"], conds=[UserFileTable.id == 3])
+    ret["test"] = "hui"
+    print(ret)
+
     ret = await UserFileManager().query_all(cols=[UserFileTable.filename, UserFileTable.oss_key])
+    ret[0]["test"] = "hui"
     print("ret", ret)
 
     ret = await UserFileManager().query_all(cols=["filename", "oss_key"])

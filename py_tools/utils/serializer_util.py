@@ -8,6 +8,7 @@ from dataclasses import asdict, dataclass
 from typing import List, Type, Union
 
 from pydantic import BaseModel
+from sqlalchemy import RowMapping
 
 from py_tools.connections.db.mysql import BaseOrmTable
 
@@ -88,6 +89,9 @@ class SerializerUtil:
 
         if isinstance(model_obj, dict):
             return model_obj
+
+        if isinstance(model_obj, RowMapping):
+            return dict(model_obj)
 
         elif isinstance(model_obj, BaseModel):
             # Pydantic 模型对象处理，model_dump() 返回字典

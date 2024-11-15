@@ -22,6 +22,7 @@ from sqlalchemy.ext.asyncio import (
 
 from py_tools.connections.db.mysql import BaseOrmTable
 from py_tools.meta_cls import SingletonMetaCls
+from py_tools.utils import SerializerUtil
 
 T_BaseOrmTable = TypeVar("T_BaseOrmTable", bound=BaseOrmTable)
 T_Hints = TypeVar("T_Hints")  # 用于修复被装饰的函数参数提示，让IDE有类型提示
@@ -493,13 +494,15 @@ class DBManager(metaclass=SingletonMetaCls):
                 return cursor_result.scalar_one_or_none() or {}
 
             # eg: select username, age from user where id=1 => {"username": "hui", "age": 18}
-            return cursor_result.mappings().one_or_none() or {}
+            ret = cursor_result.mappings().one_or_none() or {}
+            return SerializerUtil.model_to_data(ret)
         else:
             # 未指定列名查询默认全部字段，返回的是表实例对象 BaseOrmTable()
             # eg: select id, username, age from user where id=1 => UserTable(id=1, username="hui", age=18)
             if join_tables:
                 # 连表还是返回 dict
-                return cursor_result.mappings().one_or_none() or {}
+                ret = cursor_result.mappings().one_or_none() or {}
+                return SerializerUtil.model_to_data(ret)
             return cursor_result.scalar_one_or_none() or {}
 
     @with_session
@@ -548,12 +551,14 @@ class DBManager(metaclass=SingletonMetaCls):
                 return cursor_result.scalars().all() or []
 
             # eg: select username, age from user => [{"username": "hui", "age": 18}, [{"username": "dbk", "age": 18}]]
-            return cursor_result.mappings().all() or []
+            ret = cursor_result.mappings().all() or []
+            return SerializerUtil.model_to_data(ret)
         else:
             # 未指定列名查询默认全部字段，
             if join_tables:
                 # 连表查询还是返回 dict 列表
-                return cursor_result.mappings().all() or []
+                ret = cursor_result.mappings().all() or []
+                return SerializerUtil.model_to_data(ret)
 
             # 返回的是表实例对象 [BaseOrmTable()]
             # eg: select id, username, age from user
