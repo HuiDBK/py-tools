@@ -34,6 +34,9 @@ class SerializerUtil:
             data_obj: 支持 字典对象, pydantic、sqlalchemy模型对象, 列表对象
             to_model: 转换后数据模型
 
+        Notes:
+            - 对于实现了 to_dict() 方法的模型对象，将调用该方法返回字典。
+
         returns:
             转换后的对象
         """
@@ -81,7 +84,10 @@ class SerializerUtil:
         将 Pydantic 模型或 SQLAlchemy 模型对象转换回原始字典或列表对象。
 
         Args:
-            model_obj: 支持 Pydantic 模型对象、SQLAlchemy 模型对象，或者它们的列表
+            model_obj: 支持 Pydantic 模型对象、SQLAlchemy 模型、dataclass 对象，或者它们的列表
+
+        Notes:
+            - 对于实现了 to_dict() 方法的模型对象，将调用该方法返回字典。
 
         Returns:
             转换后的字典或列表

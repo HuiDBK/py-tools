@@ -162,7 +162,7 @@ class AsyncHttpClient:
             timeout = aiohttp.ClientTimeout(timeout.total_seconds())
 
         headers = headers or {}
-        headers = self.default_headers.update(**headers)
+        headers.update(self.default_headers)
         client_session = await self._get_client_session()
         self.cur_session = client_session
         return await client_session.request(

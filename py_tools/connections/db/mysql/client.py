@@ -494,7 +494,7 @@ class DBManager(metaclass=SingletonMetaCls):
                 # 单行单字段查询: 直接返回字段结果
                 # eg: select count(*) as count from user 从 {"count": 100} => 100
                 # eg: select username from user where id=1 从 {"username": "hui"} => "hui"
-                return cursor_result.scalar_one_or_none() or {}
+                return cursor_result.scalar_one_or_none()
 
             # eg: select username, age from user where id=1 => {"username": "hui", "age": 18}
             ret = cursor_result.mappings().one_or_none() or {}
