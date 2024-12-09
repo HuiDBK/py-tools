@@ -10,8 +10,8 @@ from setuptools import find_packages, setup
 
 
 class PKGManager:
-    name = "hui-tools"
-    version = "0.5.8"
+    name = "huidevkit"
+    version = "0.6.0"
     author = "hui"
     author_email = "huidbk@163.com"
 
@@ -68,6 +68,7 @@ def main():
         packages=find_packages(),
         url="https://github.com/HuiDBK/py-tools",
         license="Apache",
+        description="Practical Python development tools",
         long_description=PKGManager.get_pkg_desc(),
         long_description_content_type="text/markdown",
         install_requires=PKGManager.get_install_requires(),

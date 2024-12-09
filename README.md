@@ -8,10 +8,11 @@
 - 环境要求：python version >= 3.8
 - 历史版本记录：https://pypi.org/project/hui-tools/#history
 
+> 根据 [PEP 625](https://peps.python.org/pep-0625/) 要求，从 0.6.0 版本开始，将包名从 `hui-tools` 改成了 `huidevkit`， 历史版本的包名仍然可用，但是不推荐使用。
 
 ### 默认安装
 ```python
-pip install hui-tools
+pip install huidevkit
 ```
 默认安装如下功能可以使用
 - 时间工具类
@@ -25,12 +26,12 @@ pip install hui-tools
 
 ### 全部安装
 ```python
-pip install hui-tools[all]
+pip install huidevkit[all]
 ```
 
 ### 可选安装
 ```python
-pip install hui-tools[db-orm, db-redis, excel-tools]
+pip install huidevkit[db-orm, db-redis, excel-tools]
 ```
 
 可选参数参考：
