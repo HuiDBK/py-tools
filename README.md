@@ -5,7 +5,7 @@
 > 设计细节请移步到掘金查看：https://juejin.cn/column/7131286129713610766
 
 ## 安装
-- 环境要求：python version >= 3.8
+- 环境要求：python version >= 3.9
 - 历史版本记录：https://pypi.org/project/hui-tools/#history
 
 > 根据 [PEP 625](https://peps.python.org/pep-0625/) 要求，从 0.6.0 版本开始，将包名从 `hui-tools` 改成了 `huidevkit`， 历史版本的包名仍然可用，但是不推荐使用。
