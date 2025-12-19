@@ -6,7 +6,7 @@
 
 ## 安装
 - 环境要求：python version >= 3.9
-- 历史版本记录：https://pypi.org/project/hui-tools/#history
+- 历史版本记录：https://pypi.org/project/huidevkit/#history
 
 > 根据 [PEP 625](https://peps.python.org/pep-0625/) 要求，从 0.6.0 版本开始，将包名从 `hui-tools` 改成了 `huidevkit`， 历史版本的包名仍然可用，但是不推荐使用。
 
@@ -244,7 +244,7 @@ if __name__ == "__main__":
 - [x] pydantic model 、dataclass 与 SQLALChemy table 序列化与反序列工具类
 - 认证相关工具类
   - [x] JWT 工具类
-- 图片操作工具类，例如校验图片分辨率
+- [x] 图片操作工具类
 - 邮件服务工具类
 - 配置解析工具类
 - 编码工具类，统一 base64、md5等编码入口
