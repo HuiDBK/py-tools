@@ -31,7 +31,7 @@ def gen_py_project(project_name):
 
     # 创建 requirements.txt 文件（示例中简单创建一个空文件）
     with open(os.path.join(project_name, "requirements.txt"), "w") as requirements:
-        requirements.write("hui-tools")
+        requirements.write("huidevkit")
 
     # 创建 pre-commit-config.yaml、ruff.toml 文件
     shutil.copy(
