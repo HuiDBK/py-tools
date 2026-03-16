@@ -11,9 +11,6 @@ from pathlib import Path
 
 from loguru import logger
 
-# 项目基准目录
-BASE_DIR = Path(__file__).parent.parent.parent.parent
-
 template_dir = os.path.dirname(__file__)
 py_template_dir = os.path.join(template_dir, "python_project")
 
@@ -37,8 +34,10 @@ def gen_py_project(project_name):
         requirements.write("hui-tools")
 
     # 创建 pre-commit-config.yaml、ruff.toml 文件
-    shutil.copy(src=BASE_DIR / ".pre-commit-config.yaml", dst=os.path.join(project_name, ".pre-commit-config.yaml"))
-    shutil.copy(src=BASE_DIR / "ruff.toml", dst=os.path.join(project_name, "ruff.toml"))
+    shutil.copy(
+        src=Path(py_template_dir) / ".pre-commit-config.yaml", dst=os.path.join(project_name, ".pre-commit-config.yaml")
+    )
+    shutil.copy(src=Path(py_template_dir) / "ruff.toml", dst=os.path.join(project_name, "ruff.toml"))
 
     # 创建 docs 目录
     os.makedirs(os.path.join(project_name, "docs"), exist_ok=True)

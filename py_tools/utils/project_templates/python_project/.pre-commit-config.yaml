@@ -1,0 +1,31 @@
+default_stages: [ commit ]
+
+# Install
+# 1. pip install pre-commit
+# 2. pre-commit install
+# 3. pre-commit run --all-files  # 检查全部文件
+# 4. pre-commit run --files py_tools/connections/*  # 检查指定目录或文件
+repos:
+  - repo: https://github.com/pycqa/isort
+    rev: 5.11.5
+    hooks:
+      - id: isort
+        args: ['--profile', 'black']
+        exclude: >-
+            (?x)^(
+            .*__init__\.py$
+            )
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    # Ruff version.
+    rev: v0.2.0
+    hooks:
+      - id: ruff
+        args: [ --fix ]
+      - id: ruff-format
+
+  - repo: https://github.com/psf/black
+    rev: 23.3.0
+    hooks:
+      - id: black
+        args: ['--line-length', '120']

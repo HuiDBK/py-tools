@@ -5,6 +5,8 @@ __pycache__/
 
 *.xlsx
 
+.DS_Store
+
 .idea
 # C extensions
 *.so

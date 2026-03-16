@@ -37,6 +37,7 @@ class PKGManager:
             "cacheout==0.14.1",
             "aiofiles==24.1.0",
             "python-jose==3.3.0",
+            "pillow==11.1.0",
         ]
         return requires
 
